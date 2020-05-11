@@ -1,0 +1,3 @@
+rootProject.name='PagingKtx'
+include ':app'
+include ':paging_ktx'
