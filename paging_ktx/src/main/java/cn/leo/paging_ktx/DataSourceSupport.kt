@@ -1,5 +1,9 @@
-package cn.leo.pagingktx.support
+package cn.leo.paging_ktx
 
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.paging.DataSource
 import androidx.paging.ItemKeyedDataSource
 import androidx.paging.PageKeyedDataSource
 import androidx.paging.PositionalDataSource
@@ -108,6 +112,41 @@ fun <Key, Value> pageKeyedDataSource(
     }
 }
 
+/**
+ * 增加是否有更多数据的 工厂类
+ */
+class DataSourceFactoryKtx<Key, Value>(
+    private val create: NoMoreData.() -> DataSource<Key, Value>
+) :
+    DataSource.Factory<Key, Value>() {
+    private val noMoreLiveData by lazy {
+        MutableLiveData<Boolean>()
+    }
+
+    private val noMoreData by lazy { NoMoreData(noMoreLiveData) }
+
+    private var currentDataSource: DataSource<Key, Value>? = null
+
+    override fun create(): DataSource<Key, Value> {
+        currentDataSource = create.invoke(noMoreData)
+        return currentDataSource!!
+    }
+
+    fun noMoreDataObserver(owner: LifecycleOwner, observer: Observer<Boolean>) {
+        noMoreLiveData.observe(owner, observer)
+    }
+
+    fun refresh() {
+        currentDataSource?.invalidate()
+        noMoreLiveData.postValue(false)
+    }
+
+    class NoMoreData(private val liveData: MutableLiveData<Boolean>) {
+        fun setNoMoreData(noMoreData: Boolean) {
+            liveData.postValue(noMoreData)
+        }
+    }
+}
 
 
 

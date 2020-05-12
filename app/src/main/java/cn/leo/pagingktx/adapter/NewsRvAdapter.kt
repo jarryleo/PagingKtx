@@ -1,7 +1,7 @@
 package cn.leo.pagingktx.adapter
 
 import android.widget.ImageView
-import cn.leo.paging_ktx.RvAdapterKtx
+import cn.leo.paging_ktx.PagedListAdapterKtx
 import cn.leo.pagingktx.R
 import cn.leo.pagingktx.bean.News
 import cn.leo.pagingktx.image.loadImage
@@ -10,7 +10,7 @@ import cn.leo.pagingktx.image.loadImage
  * @author : ling luo
  * @date : 2020/5/11
  */
-class NewsRvAdapter : RvAdapterKtx<News.StoriesBean>(
+class NewsRvAdapter : PagedListAdapterKtx<News.StoriesBean>(
     createDiffCallback(
         areItemsTheSame = { old, new ->
             old.id == new.id

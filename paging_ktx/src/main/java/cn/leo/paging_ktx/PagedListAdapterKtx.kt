@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
  * @date : 2020/5/11
  */
 @Suppress("UNUSED", "MemberVisibilityCanBePrivate")
-abstract class RvAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHolder> {
+abstract class PagedListAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHolder> {
 
     constructor() : super(createDiffCallback())
 
@@ -74,7 +74,7 @@ abstract class RvAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHold
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as? RvAdapterKtx<out Any>.ViewHolder)?.onBindViewHolder(position)
+        (holder as? PagedListAdapterKtx<out Any>.ViewHolder)?.onBindViewHolder(position)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -96,21 +96,24 @@ abstract class RvAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHold
         if (payloads.isEmpty()) {
             onBindViewHolder(holder, position)
         } else {
-            val viewHolder = holder as? RvAdapterKtx<*>.ViewHolder
+            val viewHolder = holder as? PagedListAdapterKtx<*>.ViewHolder
             val helper = viewHolder?.itemHelper
             val itemHolder = helper?.mItemHolder
             val item = getItem(position)
             if (itemHolder != null) {
                 itemHolder.bindData(helper, item, payloads)
             } else {
-                (holder as? RvAdapterKtx<out Any>.ViewHolder)?.onBindViewHolder(position, payloads)
+                (holder as? PagedListAdapterKtx<out Any>.ViewHolder)?.onBindViewHolder(
+                    position,
+                    payloads
+                )
             }
         }
     }
 
 
     override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
-        val viewHolder = holder as? RvAdapterKtx<*>.ViewHolder
+        val viewHolder = holder as? PagedListAdapterKtx<*>.ViewHolder
         val helper = viewHolder?.itemHelper
         val itemHolder = helper?.mItemHolder
         itemHolder?.onViewDetach(helper)
@@ -128,7 +131,8 @@ abstract class RvAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHold
         init {
             itemHelper.setLayoutResId(layout)
             itemHelper.setOnItemChildClickListener(mOnItemChildClickListenerProxy)
-            itemHelper.setRVAdapter(this@RvAdapterKtx)
+            itemHelper.setOnItemChildLongClickListener(mOnItemChildLongClickListenerProxy)
+            itemHelper.setRVAdapter(this@PagedListAdapterKtx)
             itemView.setOnClickListener(this)
             itemView.setOnLongClickListener(this)
         }
@@ -142,25 +146,26 @@ abstract class RvAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHold
 
         override fun onClick(v: View) {
             if (::mOnItemClickListener.isInitialized) {
-                mOnItemClickListener(this@RvAdapterKtx, v, mPosition)
+                mOnItemClickListener(this@PagedListAdapterKtx, v, mPosition)
             }
         }
 
         override fun onLongClick(v: View): Boolean {
             if (::mOnItemLongClickListener.isInitialized) {
-                mOnItemLongClickListener(this@RvAdapterKtx, v, mPosition)
+                mOnItemLongClickListener(this@PagedListAdapterKtx, v, mPosition)
                 return true
             }
             return false
         }
     }
 
-    class ItemHelper(private val viewHolder: RvAdapterKtx<out Any>.ViewHolder) :
-        View.OnClickListener {
+    class ItemHelper(private val viewHolder: PagedListAdapterKtx<out Any>.ViewHolder) :
+        View.OnClickListener, View.OnLongClickListener {
         private val viewCache = SparseArray<View>()
         private val clickListenerCache = ArrayList<Int>()
+        private val longClickListenerCache = ArrayList<Int>()
         private val mTags = HashMap<String, Any>()
-        lateinit var adapter: RvAdapterKtx<out Any>
+        lateinit var adapter: PagedListAdapterKtx<out Any>
             private set
 
         @LayoutRes
@@ -173,7 +178,10 @@ abstract class RvAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHold
         var tag: Any? = null
 
         private lateinit var mOnItemChildClickListener:
-                    (adapter: RvAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                    (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+
+        private lateinit var mOnItemChildLongClickListener:
+                    (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
 
         fun setLayoutResId(@LayoutRes layoutResId: Int) {
             this.itemLayoutResId = layoutResId
@@ -181,13 +189,20 @@ abstract class RvAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHold
 
         fun setOnItemChildClickListener(
             onItemChildClickListener:
-                (adapter: RvAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
         ) {
             mOnItemChildClickListener = onItemChildClickListener
         }
 
-        fun setRVAdapter(RVAdapter: RvAdapterKtx<out Any>) {
-            adapter = RVAdapter
+        fun setOnItemChildLongClickListener(
+            onItemChildLongClickListener:
+                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+        ) {
+            mOnItemChildLongClickListener = onItemChildLongClickListener
+        }
+
+        fun setRVAdapter(PagedListAdapter: PagedListAdapterKtx<out Any>) {
+            adapter = PagedListAdapter
         }
 
         fun setTag(key: String, tag: Any) {
@@ -398,10 +413,33 @@ abstract class RvAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHold
             return this
         }
 
+        /**
+         * 给条目中的view添加长按事件
+         *
+         * @param viewId 控件id
+         */
+        fun addOnLongClickListener(@IdRes viewId: Int): ItemHelper {
+            val contains = longClickListenerCache.contains(viewId)
+            if (!contains) {
+                getViewById<View>(viewId) { it.setOnLongClickListener(this) }
+                longClickListenerCache.add(viewId)
+            }
+            return this
+        }
+
         override fun onClick(v: View) {
             if (::mOnItemChildClickListener.isInitialized) {
                 mOnItemChildClickListener(adapter, v, position)
             }
+        }
+
+
+        override fun onLongClick(v: View): Boolean {
+            if (::mOnItemChildLongClickListener.isInitialized) {
+                mOnItemChildLongClickListener(adapter, v, position)
+                return true
+            }
+            return false
         }
 
         var mItemHolder: ItemHolder<Any>? = null
@@ -460,36 +498,45 @@ abstract class RvAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHold
     }
 
     private lateinit var mOnItemClickListener:
-                (adapter: RvAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
     private lateinit var mOnItemLongClickListener:
-                (adapter: RvAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
     private lateinit var mOnItemChildClickListener:
-                (adapter: RvAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+    private lateinit var mOnItemChildLongClickListener:
+                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
     val mOnItemChildClickListenerProxy:
-                (adapter: RvAdapterKtx<out Any>, v: View, position: Int) -> Unit =
+                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit =
         { adapter, v, position ->
             if (::mOnItemChildClickListener.isInitialized) {
                 mOnItemChildClickListener(adapter, v, position)
             }
         }
+    val mOnItemChildLongClickListenerProxy:
+                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit =
+        { adapter, v, position ->
+            if (::mOnItemChildLongClickListener.isInitialized) {
+                mOnItemChildLongClickListener(adapter, v, position)
+            }
+        }
 
     fun setOnItemClickListener(
         onItemClickListener:
-            (adapter: RvAdapterKtx<out Any>, v: View, position: Int) -> Unit
+            (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
     ) {
         mOnItemClickListener = onItemClickListener
     }
 
     fun setOnItemLongClickListener(
         onItemLongClickListener:
-            (adapter: RvAdapterKtx<out Any>, v: View, position: Int) -> Unit
+            (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
     ) {
         mOnItemLongClickListener = onItemLongClickListener
     }
 
     fun setOnItemChildClickListener(
         onItemChildClickListener:
-            (adapter: RvAdapterKtx<out Any>, v: View, position: Int) -> Unit
+            (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
     ) {
         mOnItemChildClickListener = onItemChildClickListener
     }

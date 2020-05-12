@@ -72,4 +72,10 @@ dependencies {
     implementation 'androidx.paging:paging-runtime:2.1.2'
     implementation 'androidx.paging:paging-runtime-ktx:2.1.2'
     implementation project(path: ':paging_ktx')
+
+    //测试谷歌新的MergeAdapter
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha03'
+
+    //下拉刷新
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
 }

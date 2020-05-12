@@ -1,14 +1,14 @@
 package cn.leo.pagingktx.model
 
 import androidx.lifecycle.viewModelScope
-import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
+import cn.leo.paging_ktx.DataSourceFactoryKtx
+import cn.leo.paging_ktx.pageKeyedDataSource
 import cn.leo.pagingktx.bean.News
 import cn.leo.pagingktx.net.Apis
 import cn.leo.pagingktx.net.LoggerInterceptor
 import cn.leo.pagingktx.net.Urls
-import cn.leo.pagingktx.support.pageKeyedDataSource
 import cn.leo.retrofit_ktx.http.OkHttp3Creator
 import cn.leo.retrofit_ktx.http.await
 import cn.leo.retrofit_ktx.http.create
@@ -38,33 +38,31 @@ class ZhiHuNewsViewModel : KNetViewModel<Apis>() {
         add(Calendar.DATE, 1)
     }
 
-    private val dataSource by lazy {
-        pageKeyedDataSource<Long, News.StoriesBean>(
-            initial = { _, callback ->
-                viewModelScope.launch {
-                    val date =
-                        SimpleDateFormat("yyyyMMdd", Locale.CHINA)
+    val dataSourceFactory by lazy {
+        DataSourceFactoryKtx<Long, News.StoriesBean> {
+            pageKeyedDataSource<Long, News.StoriesBean>(
+                initial = { _, callback ->
+                    viewModelScope.launch {
+                        val date = SimpleDateFormat("yyyyMMdd", Locale.CHINA)
                             .format(mDate.time).toLong()
-                    val result = api.getNews(date).await()
-                    result?.let {
-                        callback.onResult(it.stories, 0, it.date.toLong())
+                        val result = api.getNews(date).await()
+                        result?.let {
+                            callback.onResult(it.stories, 0, it.date.toLong())
+                        }
+                    }
+                },
+                after = { params, callback ->
+                    viewModelScope.launch {
+                        val result = api.getNews(params.key).await()
+                        result?.let {
+                            callback.onResult(it.stories, it.date.toLong())
+                            if (it.stories.isEmpty()) {
+                                setNoMoreData(true)
+                            }
+                        }
                     }
                 }
-            },
-            after = { params, callback ->
-                viewModelScope.launch {
-                    val result = api.getNews(params.key).await()
-                    result?.let {
-                        callback.onResult(it.stories, it.date.toLong())
-                    }
-                }
-            }
-        )
-    }
-
-    private val dataSourceFactory by lazy {
-        object : DataSource.Factory<Long, News.StoriesBean>() {
-            override fun create(): DataSource<Long, News.StoriesBean> = dataSource
+            )
         }
     }
 
@@ -77,4 +75,8 @@ class ZhiHuNewsViewModel : KNetViewModel<Apis>() {
 
     val allNews =
         LivePagedListBuilder(dataSourceFactory, config).build()
+
+    fun refresh() = async {
+        dataSourceFactory.refresh()
+    }
 }
