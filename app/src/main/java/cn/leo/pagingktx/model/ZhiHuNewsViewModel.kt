@@ -3,12 +3,12 @@ package cn.leo.pagingktx.model
 import androidx.lifecycle.viewModelScope
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
-import androidx.paging.PageKeyedDataSource
 import androidx.paging.PagedList
 import cn.leo.pagingktx.bean.News
 import cn.leo.pagingktx.net.Apis
 import cn.leo.pagingktx.net.LoggerInterceptor
 import cn.leo.pagingktx.net.Urls
+import cn.leo.pagingktx.support.pageKeyedDataSource
 import cn.leo.retrofit_ktx.http.OkHttp3Creator
 import cn.leo.retrofit_ktx.http.await
 import cn.leo.retrofit_ktx.http.create
@@ -39,11 +39,8 @@ class ZhiHuNewsViewModel : KNetViewModel<Apis>() {
     }
 
     private val dataSource by lazy {
-        object : PageKeyedDataSource<Long, News.StoriesBean>() {
-            override fun loadInitial(
-                params: LoadInitialParams<Long>,
-                callback: LoadInitialCallback<Long, News.StoriesBean>
-            ) {
+        pageKeyedDataSource<Long, News.StoriesBean>(
+            initial = { _, callback ->
                 viewModelScope.launch {
                     val date =
                         SimpleDateFormat("yyyyMMdd", Locale.CHINA)
@@ -53,12 +50,8 @@ class ZhiHuNewsViewModel : KNetViewModel<Apis>() {
                         callback.onResult(it.stories, 0, it.date.toLong())
                     }
                 }
-            }
-
-            override fun loadAfter(
-                params: LoadParams<Long>,
-                callback: LoadCallback<Long, News.StoriesBean>
-            ) {
+            },
+            after = { params, callback ->
                 viewModelScope.launch {
                     val result = api.getNews(params.key).await()
                     result?.let {
@@ -66,13 +59,7 @@ class ZhiHuNewsViewModel : KNetViewModel<Apis>() {
                     }
                 }
             }
-
-            override fun loadBefore(
-                params: LoadParams<Long>,
-                callback: LoadCallback<Long, News.StoriesBean>
-            ) {
-            }
-        }
+        )
     }
 
     private val dataSourceFactory by lazy {
