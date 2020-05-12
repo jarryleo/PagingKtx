@@ -48,6 +48,11 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
+    //glide
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    kapt 'com.github.bumptech.glide:compiler:4.9.0'
+    implementation 'com.github.bumptech.glide:okhttp3-integration:4.9.0'
+
     //retrofit_ktx
     implementation 'com.github.jarryleo:RetrofitKtx:v1.0.2'
 
@@ -57,8 +62,8 @@ dependencies {
     implementation 'androidx.room:room-ktx:2.2.5'
 
     //paging
-    implementation 'androidx.paging:paging-common:2.1.2'
-    implementation 'androidx.paging:paging-common-ktx:2.1.2'
+    //implementation 'androidx.paging:paging-common:2.1.2'
+    //implementation 'androidx.paging:paging-common-ktx:2.1.2'
     implementation 'androidx.paging:paging-runtime:2.1.2'
     implementation 'androidx.paging:paging-runtime-ktx:2.1.2'
     implementation project(path: ':paging_ktx')

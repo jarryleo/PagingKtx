@@ -39,10 +39,8 @@ class UserModel : KViewModel() {
         .setInitialLoadSizeHint(20)              //初始化加载的数量
         .build()
 
-    val allStudents = LivePagedListBuilder(
-        db.userDao().getAllUser(),
-        config
-    ).build()
+    val allStudents =
+        LivePagedListBuilder(db.userDao().getAllUser(), config).build()
 
     //插入假数据
     fun insert() = async {

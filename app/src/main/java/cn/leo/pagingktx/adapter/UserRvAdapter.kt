@@ -11,7 +11,6 @@ import cn.leo.pagingktx.db.bean.User
 class UserRvAdapter : RvAdapterKtx<User>(
     createDiffCallback(
         areItemsTheSame = { old, new ->
-            println("$old <==> $new")
             old.id == new.id
         },
         areContentsTheSame = { old, new ->
