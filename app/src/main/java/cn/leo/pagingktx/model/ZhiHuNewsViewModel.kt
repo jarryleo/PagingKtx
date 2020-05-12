@@ -24,8 +24,6 @@ import java.util.*
 class ZhiHuNewsViewModel : KNetViewModel<Apis>() {
     override fun getBaseUrl() = Urls.baseUrlZhiHu
 
-    val api by lazy { createApi() }
-
     override fun createApi(): Apis {
         return Apis::class.java.create {
             baseUrl = getBaseUrl()
