@@ -28,9 +28,27 @@ object RoomHelper {
      * 实例化数据库对象
      */
     fun <T : RoomDatabase> getDb(context: Context, clazz: Class<T>): T {
-        return (dbCache[clazz] as? T) ?: Room.databaseBuilder(
+        val db = dbCache[clazz] as? T
+        if (db != null ) {
+            if (db.isOpen){
+                return db
+            }else{
+                dbCache.remove(clazz)
+            }
+        }
+        return Room.databaseBuilder(
             context, clazz, DB_NAME
         ).build().also { dbCache[clazz] = it }
+    }
+
+    /**
+     * 关闭数据库
+     */
+    fun <T : RoomDatabase> release(clazz: Class<T>) {
+        dbCache[clazz]?.let {
+            it.close()
+            dbCache.remove(clazz)
+        }
     }
 
     /**

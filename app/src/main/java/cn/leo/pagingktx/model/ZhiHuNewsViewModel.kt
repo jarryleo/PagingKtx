@@ -1,5 +1,6 @@
 package cn.leo.pagingktx.model
 
+import android.util.Log
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import cn.leo.paging_ktx.DataSourceFactoryKtx
@@ -54,8 +55,17 @@ class ZhiHuNewsViewModel : BaseViewModel() {
         .setInitialLoadSizeHint(30)               //初始化加载的数量
         .build()
 
+    private val boundaryCallback =
+        object : PagedList.BoundaryCallback<News.StoriesBean>() {
+            override fun onItemAtEndLoaded(itemAtEnd: News.StoriesBean) {
+                Log.e("BoundaryCallback", "加载更多！！${itemAtEnd.title}")
+            }
+        }
+
     val allNews =
-        LivePagedListBuilder(dataSourceFactory, config).build()
+        LivePagedListBuilder(dataSourceFactory, config)
+            .setBoundaryCallback(boundaryCallback)
+            .build()
 
     fun refresh() = async {
         dataSourceFactory.refresh()
