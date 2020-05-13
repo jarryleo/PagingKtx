@@ -12,6 +12,7 @@ import cn.leo.retrofit_ktx.view_model.KNetViewModel
  * @date : 2020/5/12
  */
 open class BaseViewModel : KNetViewModel<Apis>() {
+
     override fun getBaseUrl() = Urls.baseUrlZhiHu
 
     override fun createApi(): Apis {

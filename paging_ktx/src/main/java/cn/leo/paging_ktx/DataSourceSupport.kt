@@ -20,19 +20,25 @@ fun <T> positionDataSource(
     initial: (
         PositionalDataSource.LoadInitialParams,
         callback: PositionalDataSource.LoadInitialCallback<T>
-    ) -> Unit = { _, _ -> },
+    ) -> RequestDataState = { _, _ -> RequestDataState.FAILED() },
     range: (
         PositionalDataSource.LoadRangeParams,
         callback: PositionalDataSource.LoadRangeCallback<T>
-    ) -> Unit = { _, _ -> }
-): PositionalDataSource<T> {
-    return object : PositionalDataSource<T>() {
-        override fun loadRange(params: LoadRangeParams, callback: LoadRangeCallback<T>) {
-            range(params, callback)
+    ) -> RequestDataState = { _, _ -> RequestDataState.FAILED() }
+): PositionalDataSourceKtx<T> {
+    return object : PositionalDataSourceKtx<T>() {
+        override fun loadRangeState(
+            params: LoadRangeParams,
+            callback: LoadRangeCallback<T>
+        ): RequestDataState {
+            return range(params, callback)
         }
 
-        override fun loadInitial(params: LoadInitialParams, callback: LoadInitialCallback<T>) {
-            initial(params, callback)
+        override fun loadInitialState(
+            params: LoadInitialParams,
+            callback: LoadInitialCallback<T>
+        ): RequestDataState {
+            return initial(params, callback)
         }
     }
 }
@@ -44,31 +50,37 @@ fun <Key, Value> itemKeyedDataSource(
     initial: (
         ItemKeyedDataSource.LoadInitialParams<Key>,
         ItemKeyedDataSource.LoadInitialCallback<Value>
-    ) -> Unit = { _, _ -> },
+    ) -> RequestDataState = { _, _ -> RequestDataState.FAILED() },
     after: (
         ItemKeyedDataSource.LoadParams<Key>,
         ItemKeyedDataSource.LoadCallback<Value>
-    ) -> Unit = { _, _ -> },
+    ) -> RequestDataState = { _, _ -> RequestDataState.FAILED() },
     before: (
         ItemKeyedDataSource.LoadParams<Key>,
         ItemKeyedDataSource.LoadCallback<Value>
-    ) -> Unit = { _, _ -> },
+    ) -> RequestDataState = { _, _ -> RequestDataState.FAILED() },
     key: (Value) -> Key
-): ItemKeyedDataSource<Key, Value> {
-    return object : ItemKeyedDataSource<Key, Value>() {
-        override fun loadInitial(
+): ItemKeyedDataSourceKtx<Key, Value> {
+    return object : ItemKeyedDataSourceKtx<Key, Value>() {
+        override fun loadInitialState(
             params: LoadInitialParams<Key>,
             callback: LoadInitialCallback<Value>
-        ) {
-            initial(params, callback)
+        ): RequestDataState {
+            return initial(params, callback)
         }
 
-        override fun loadAfter(params: LoadParams<Key>, callback: LoadCallback<Value>) {
-            after(params, callback)
+        override fun loadAfterState(
+            params: LoadParams<Key>,
+            callback: LoadCallback<Value>
+        ): RequestDataState {
+            return after(params, callback)
         }
 
-        override fun loadBefore(params: LoadParams<Key>, callback: LoadCallback<Value>) {
-            before(params, callback)
+        override fun loadBeforeState(
+            params: LoadParams<Key>,
+            callback: LoadCallback<Value>
+        ): RequestDataState {
+            return before(params, callback)
         }
 
         override fun getKey(item: Value): Key {
@@ -84,30 +96,36 @@ fun <Key, Value> pageKeyedDataSource(
     initial: (
         PageKeyedDataSource.LoadInitialParams<Key>,
         PageKeyedDataSource.LoadInitialCallback<Key, Value>
-    ) -> Unit = { _, _ -> },
+    ) -> RequestDataState = { _, _ -> RequestDataState.FAILED() },
     after: (
         PageKeyedDataSource.LoadParams<Key>,
         PageKeyedDataSource.LoadCallback<Key, Value>
-    ) -> Unit = { _, _ -> },
+    ) -> RequestDataState = { _, _ -> RequestDataState.FAILED() },
     before: (
         PageKeyedDataSource.LoadParams<Key>,
         PageKeyedDataSource.LoadCallback<Key, Value>
-    ) -> Unit = { _, _ -> }
-): PageKeyedDataSource<Key, Value> {
-    return object : PageKeyedDataSource<Key, Value>() {
-        override fun loadInitial(
+    ) -> RequestDataState = { _, _ -> RequestDataState.FAILED() }
+): PageKeyedDataSourceKtx<Key, Value> {
+    return object : PageKeyedDataSourceKtx<Key, Value>() {
+        override fun loadInitialState(
             params: LoadInitialParams<Key>,
             callback: LoadInitialCallback<Key, Value>
-        ) {
-            initial(params, callback)
+        ): RequestDataState {
+            return initial(params, callback)
         }
 
-        override fun loadAfter(params: LoadParams<Key>, callback: LoadCallback<Key, Value>) {
-            after(params, callback)
+        override fun loadAfterState(
+            params: LoadParams<Key>,
+            callback: LoadCallback<Key, Value>
+        ): RequestDataState {
+            return after(params, callback)
         }
 
-        override fun loadBefore(params: LoadParams<Key>, callback: LoadCallback<Key, Value>) {
-            before(params, callback)
+        override fun loadBeforeState(
+            params: LoadParams<Key>,
+            callback: LoadCallback<Key, Value>
+        ): RequestDataState {
+            return before(params, callback)
         }
     }
 }

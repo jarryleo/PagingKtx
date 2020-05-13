@@ -1,12 +1,15 @@
 package cn.leo.pagingktx.model
 
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import cn.leo.paging_ktx.DataSourceFactoryKtx
+import cn.leo.paging_ktx.RequestDataState
 import cn.leo.paging_ktx.pageKeyedDataSource
 import cn.leo.pagingktx.bean.News
 import cn.leo.retrofit_ktx.http.await
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,7 +27,7 @@ class ZhiHuNewsViewModel : BaseViewModel() {
         DataSourceFactoryKtx<Long, News.StoriesBean> {
             pageKeyedDataSource<Long, News.StoriesBean>(
                 initial = { _, callback ->
-                    async {
+                    viewModelScope.launch {
                         val date = SimpleDateFormat("yyyyMMdd", Locale.CHINA)
                             .format(mDate.time).toLong()
                         val result = api.getNews(date).await()
@@ -32,6 +35,7 @@ class ZhiHuNewsViewModel : BaseViewModel() {
                             callback.onResult(it.stories, 0, it.date.toLong())
                         }
                     }
+                    RequestDataState.SUCCESS
                 },
                 after = { params, callback ->
                     async {
@@ -43,6 +47,7 @@ class ZhiHuNewsViewModel : BaseViewModel() {
                             }
                         }
                     }
+                    RequestDataState.SUCCESS
                 }
             )
         }
