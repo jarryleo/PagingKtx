@@ -12,6 +12,7 @@ import cn.leo.pagingktx.adapter.FooterAdapter
 import cn.leo.pagingktx.adapter.NewsRvAdapter
 import cn.leo.pagingktx.bean.News
 import cn.leo.pagingktx.model.ZhiHuNewsViewModel
+import cn.leo.pagingktx.utils.toast
 import cn.leo.retrofit_ktx.view_model.ViewModelCreator
 import kotlinx.android.synthetic.main.activity_zhi_hu.*
 
@@ -50,8 +51,9 @@ class ZhiHuActivity : AppCompatActivity() {
 
         //监听是否还有更多数据
         model.dataSourceFactory.observer(this, Observer {
-            if (it is RequestDataState.SUCCESS) {
-                footer.noMoreState(it.noMoreData)
+            when (it) {
+                is RequestDataState.SUCCESS -> footer.noMoreState(it.noMoreData)
+                is RequestDataState.FAILED -> toast("加载失败：${it.exception?.message}")
             }
         })
     }
