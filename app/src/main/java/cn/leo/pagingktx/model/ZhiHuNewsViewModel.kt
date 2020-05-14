@@ -1,15 +1,12 @@
 package cn.leo.pagingktx.model
 
 import android.util.Log
-import androidx.lifecycle.viewModelScope
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import cn.leo.paging_ktx.DataSourceFactoryKtx
+import cn.leo.paging_ktx.PageKeyedDataSourceKtx
 import cn.leo.paging_ktx.RequestDataState
-import cn.leo.paging_ktx.pageKeyedDataSource
 import cn.leo.pagingktx.bean.News
-import cn.leo.retrofit_ktx.http.await
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -25,31 +22,44 @@ class ZhiHuNewsViewModel : BaseViewModel() {
 
     val dataSourceFactory by lazy {
         DataSourceFactoryKtx<Long, News.StoriesBean> {
-            pageKeyedDataSource<Long, News.StoriesBean>(
-                initial = { _, callback ->
-                    viewModelScope.launch {
-                        val date = SimpleDateFormat("yyyyMMdd", Locale.CHINA)
-                            .format(mDate.time).toLong()
-                        val result = api.getNews(date).await()
-                        result?.let {
+            object : PageKeyedDataSourceKtx<Long, News.StoriesBean>() {
+                override fun loadInitial(
+                    params: LoadInitialParams<Long>,
+                    callback: LoadInitialCallback<Long, News.StoriesBean>
+                ) {
+                    super.loadInitial(params, callback)
+                    observeOnce(apis::getNews) {
+                        success {
                             callback.onResult(it.stories, 0, it.date.toLong())
+                            changeState(RequestDataState.SUCCESS())
                         }
-                    }
-                    RequestDataState.SUCCESS
-                },
-                after = { params, callback ->
-                    async {
-                        val result = api.getNews(params.key).await()
-                        result?.let {
-                            callback.onResult(it.stories, it.date.toLong())
-                            if (it.stories.isEmpty()) {
-                                setNoMoreData(true)
-                            }
+                        failed {
+                            changeState(RequestDataState.FAILED())
                         }
+
                     }
-                    RequestDataState.SUCCESS
+                    val date = SimpleDateFormat("yyyyMMdd", Locale.CHINA)
+                        .format(mDate.time).toLong()
+                    apis.getNews(date)
                 }
-            )
+
+                override fun loadAfter(
+                    params: LoadParams<Long>,
+                    callback: LoadCallback<Long, News.StoriesBean>
+                ) {
+                    super.loadAfter(params, callback)
+                    observeOnce(apis::getNews) {
+                        success {
+                            callback.onResult(it.stories, it.date.toLong())
+                            changeState(RequestDataState.SUCCESS(true))
+                        }
+                        failed {
+                            changeState(RequestDataState.FAILED())
+                        }
+                    }
+                    apis.getNews(params.key)
+                }
+            }
         }
     }
 
@@ -71,8 +81,4 @@ class ZhiHuNewsViewModel : BaseViewModel() {
         LivePagedListBuilder(dataSourceFactory, config)
             .setBoundaryCallback(boundaryCallback)
             .build()
-
-    fun refresh() = async {
-        dataSourceFactory.refresh()
-    }
 }

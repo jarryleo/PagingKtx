@@ -1,61 +1,42 @@
 package cn.leo.paging_ktx
 
+import androidx.annotation.CallSuper
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.paging.PageKeyedDataSource
 
 /**
  * @author : ling luo
  * @date : 2020/5/13
  */
-abstract class PageKeyedDataSourceKtx<Key, Value> : PageKeyedDataSource<Key, Value>(),
+open class PageKeyedDataSourceKtx<Key, Value> : PageKeyedDataSource<Key, Value>(),
     DataSourceState {
 
-    val dataSourceState
+    private val dataSourceState
             by lazy { MutableLiveData<RequestDataState>() }
 
-    private var retryFun: () -> Unit = {}
+    private var retryBefore: () -> Unit = {}
+    private var retryAfter: () -> Unit = {}
 
+    @CallSuper
     override fun loadInitial(
         params: LoadInitialParams<Key>,
         callback: LoadInitialCallback<Key, Value>
     ) {
         changeState(RequestDataState.LOADING())
-        changeState(loadInitialState(params, callback))
     }
 
+    @CallSuper
     override fun loadAfter(params: LoadParams<Key>, callback: LoadCallback<Key, Value>) {
         changeState(RequestDataState.LOADING(true))
-        val state = loadAfterState(params, callback)
-        changeState(state)
-        if (state == RequestDataState.FAILED(true)) {
-            retryFun = { loadAfter(params, callback) }
-        }
+        retryAfter = { loadAfter(params, callback) }
     }
 
+    @CallSuper
     override fun loadBefore(params: LoadParams<Key>, callback: LoadCallback<Key, Value>) {
         changeState(RequestDataState.LOADING(true))
-        val state = loadBeforeState(params, callback)
-        changeState(state)
-        if (state == RequestDataState.FAILED(true)) {
-            retryFun = { loadBefore(params, callback) }
-        }
-    }
-
-    abstract fun loadInitialState(
-        params: LoadInitialParams<Key>,
-        callback: LoadInitialCallback<Key, Value>
-    ): RequestDataState
-
-    abstract fun loadAfterState(
-        params: LoadParams<Key>,
-        callback: LoadCallback<Key, Value>
-    ): RequestDataState
-
-    open fun loadBeforeState(
-        params: LoadParams<Key>,
-        callback: LoadCallback<Key, Value>
-    ): RequestDataState {
-        return RequestDataState.SUCCESS(true)
+        retryBefore = { loadBefore(params, callback) }
     }
 
     override fun changeState(state: RequestDataState) {
@@ -63,6 +44,15 @@ abstract class PageKeyedDataSourceKtx<Key, Value> : PageKeyedDataSource<Key, Val
     }
 
     override fun retry() {
-        retryFun.invoke()
+        retryBefore.invoke()
+        retryAfter.invoke()
+    }
+
+    override fun refresh() {
+        invalidate()
+    }
+
+    override fun observer(owner: LifecycleOwner, observer: Observer<RequestDataState>) {
+        dataSourceState.observe(owner, observer)
     }
 }

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.MergeAdapter
+import cn.leo.paging_ktx.RequestDataState
 import cn.leo.pagingktx.adapter.FooterAdapter
 import cn.leo.pagingktx.adapter.NewsRvAdapter
 import cn.leo.pagingktx.bean.News
@@ -44,10 +45,14 @@ class ZhiHuActivity : AppCompatActivity() {
 
         //设置下拉刷新
         srl_refresh.setOnRefreshListener {
-            model.refresh()
+            model.dataSourceFactory.refresh()
         }
 
         //监听是否还有更多数据
-        model.dataSourceFactory.noMoreDataObserver(this, Observer { footer.noMoreState(it) })
+        model.dataSourceFactory.observer(this, Observer {
+            if (it is RequestDataState.SUCCESS) {
+                footer.noMoreState(it.noMoreData)
+            }
+        })
     }
 }
