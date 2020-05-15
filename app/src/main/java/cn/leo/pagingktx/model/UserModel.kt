@@ -49,7 +49,7 @@ class UserModel : KViewModel() {
 
             override fun onItemAtEndLoaded(itemAtEnd: User) {
                 Log.e("BoundaryCallback", "数据库没有更多了！！${itemAtEnd.name}")
-                insert() //请求网络加载数据
+                //insert() //请求网络加载数据
             }
         }
     val allStudents =

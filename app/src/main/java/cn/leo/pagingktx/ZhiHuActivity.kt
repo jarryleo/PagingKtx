@@ -6,9 +6,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
 import cn.leo.paging_ktx.RequestDataState
-import cn.leo.pagingktx.adapter.FooterAdapter
 import cn.leo.pagingktx.adapter.NewsRvAdapter
 import cn.leo.pagingktx.bean.News
 import cn.leo.pagingktx.model.ZhiHuNewsViewModel
@@ -28,13 +26,13 @@ class ZhiHuActivity : AppCompatActivity() {
 
     private fun initRv() {
         val adapter = NewsRvAdapter()
-        val footer = FooterAdapter() //底部加载中提示
-        val mergeAdapter = MergeAdapter(adapter, footer)
+        //val footer = FooterAdapter() //底部加载中提示
+        //val mergeAdapter = MergeAdapter(adapter, footer)
         rv_news.layoutManager = LinearLayoutManager(this)
-        rv_news.adapter = mergeAdapter
+        rv_news.adapter = adapter
         model.allNews.observe(this, Observer {
             adapter.submitList(it)
-            srl_refresh.isRefreshing = false
+            srl_refresh.finishRefresh()
         })
 
         adapter.setOnItemClickListener { a, _, position ->
@@ -52,7 +50,8 @@ class ZhiHuActivity : AppCompatActivity() {
         //监听是否还有更多数据
         model.dataSourceFactory.observer(this, Observer {
             when (it) {
-                is RequestDataState.SUCCESS -> footer.noMoreState(it.noMoreData)
+                //is RequestDataState.LOADING -> if (!it.isLoadMore) srl_refresh.autoRefresh()
+                is RequestDataState.SUCCESS -> srl_refresh.setNoMoreData(it.noMoreData)
                 is RequestDataState.FAILED -> toast("加载失败：${it.exception?.message}")
             }
         })
