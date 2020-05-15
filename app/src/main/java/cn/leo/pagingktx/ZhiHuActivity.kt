@@ -3,6 +3,7 @@ package cn.leo.pagingktx
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +25,12 @@ class ZhiHuActivity : AppCompatActivity() {
             .emptyViewLayout(R.layout.state_empty)
             .loadingViewLayout(R.layout.state_loading)
             .errorViewLayout(R.layout.state_error)
+            .addRetryButtonId(R.id.btn_retry)
+            .setRetryClickListener(object : StatusPager.OnClickListener {
+                override fun onClick(statusManager: StatusPager?, v: View?) {
+                    model.dataSourceFactory.refresh()
+                }
+            })
             .build()
     }
 
