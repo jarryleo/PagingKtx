@@ -11,12 +11,21 @@ import cn.leo.pagingktx.adapter.UserRvAdapter
 import cn.leo.pagingktx.db.bean.User
 import cn.leo.pagingktx.model.UserModel
 import cn.leo.pagingktx.utils.toast
+import cn.leo.pagingktx.view.StatusPager
 import cn.leo.retrofit_ktx.view_model.ViewModelCreator
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
     private val model by ViewModelCreator(UserModel::class.java)
+
+    private val statePager by lazy {
+        StatusPager.builder(srl_refresh)
+            .emptyViewLayout(R.layout.state_empty)
+            .loadingViewLayout(R.layout.state_loading)
+            .errorViewLayout(R.layout.state_error)
+            .build()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initView() {
+        statePager.showLoading()
         val userRvAdapter = UserRvAdapter()
         //val footer = FooterAdapter() //底部加载中提示
         //val mergeAdapter = MergeAdapter(userRvAdapter, footer)
@@ -38,6 +48,7 @@ class MainActivity : AppCompatActivity() {
          */
         rv_user.itemAnimator = null
         model.allStudents.observe(this, Observer {
+            statePager.showContent()
             srl_refresh.finishRefresh()
             userRvAdapter.submitList(it)
         })

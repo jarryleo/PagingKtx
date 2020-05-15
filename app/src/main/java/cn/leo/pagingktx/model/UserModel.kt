@@ -33,12 +33,13 @@ class UserModel : KViewModel() {
 
     private val db by DbModelProperty(DB::class.java)
 
-    private val config = PagedList.Config.Builder()
-        .setPageSize(20)                         //配置分页加载的数量
-        .setEnablePlaceholders(true)             //配置是否启动PlaceHolders
-        .setPrefetchDistance(10)                  //预取数据的距离
-        .setInitialLoadSizeHint(20)              //初始化加载的数量
-        .build()
+    private val config =
+        PagedList.Config.Builder()
+            .setPageSize(20)                         //配置分页加载的数量
+            .setEnablePlaceholders(true)             //配置是否启动PlaceHolders
+            .setPrefetchDistance(10)                 //预取数据的距离
+            .setInitialLoadSizeHint(20)              //初始化加载的数量
+            .build()
 
     private val boundaryCallback =
         object : PagedList.BoundaryCallback<User>() {
@@ -52,6 +53,7 @@ class UserModel : KViewModel() {
                 //insert() //请求网络加载数据
             }
         }
+
     val allStudents =
         LivePagedListBuilder(db.userDao().getAllUser(), config)
             .setBoundaryCallback(boundaryCallback)

@@ -11,12 +11,21 @@ import cn.leo.pagingktx.adapter.NewsRvAdapter
 import cn.leo.pagingktx.bean.News
 import cn.leo.pagingktx.model.ZhiHuNewsViewModel
 import cn.leo.pagingktx.utils.toast
+import cn.leo.pagingktx.view.StatusPager
 import cn.leo.retrofit_ktx.view_model.ViewModelCreator
 import kotlinx.android.synthetic.main.activity_zhi_hu.*
 
 class ZhiHuActivity : AppCompatActivity() {
 
     private val model by ViewModelCreator(ZhiHuNewsViewModel::class.java)
+
+    private val statePager by lazy {
+        StatusPager.builder(srl_refresh)
+            .emptyViewLayout(R.layout.state_empty)
+            .loadingViewLayout(R.layout.state_loading)
+            .errorViewLayout(R.layout.state_error)
+            .build()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +34,7 @@ class ZhiHuActivity : AppCompatActivity() {
     }
 
     private fun initRv() {
+        statePager.showLoading()
         val adapter = NewsRvAdapter()
         //val footer = FooterAdapter() //底部加载中提示
         //val mergeAdapter = MergeAdapter(adapter, footer)
@@ -51,8 +61,14 @@ class ZhiHuActivity : AppCompatActivity() {
         model.dataSourceFactory.observer(this, Observer {
             when (it) {
                 //is RequestDataState.LOADING -> if (!it.isLoadMore) srl_refresh.autoRefresh()
-                is RequestDataState.SUCCESS -> srl_refresh.setNoMoreData(it.noMoreData)
-                is RequestDataState.FAILED -> toast("加载失败：${it.exception?.message}")
+                is RequestDataState.SUCCESS -> {
+                    srl_refresh.setNoMoreData(it.noMoreData)
+                    statePager.showContent()
+                }
+                is RequestDataState.FAILED -> {
+                    toast("加载失败：${it.exception?.message}")
+                    statePager.showError()
+                }
             }
         })
     }

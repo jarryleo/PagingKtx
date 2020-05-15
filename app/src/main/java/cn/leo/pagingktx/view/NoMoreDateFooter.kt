@@ -13,7 +13,16 @@ import com.scwang.smartrefresh.layout.impl.RefreshFooterWrapper
 class NoMoreDateFooter(context: Context) : RefreshFooterWrapper(
     TextView(context).apply {
         gravity = Gravity.CENTER
-        text = "人家也是有底线的"
+        text = "加载更多。。。"
         height = 60.dp
+    }) {
+    override fun setNoMoreData(noMoreData: Boolean): Boolean {
+        val textView = view as? TextView
+        if (noMoreData) {
+            textView?.text = "人家也是有底线的"
+        } else {
+            textView?.text = "加载更多。。。"
+        }
+        return true
     }
-)
+}
