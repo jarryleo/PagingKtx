@@ -54,7 +54,7 @@ class ZhiHuNewsViewModel : BaseViewModel() {
                             changeState(RequestDataState.SUCCESS(true))
                         }
                         failed {
-                            changeState(RequestDataState.FAILED(exception = it))
+                            changeState(RequestDataState.FAILED(exception = it, isLoadMore = true))
                         }
                     }
                     apis.getNews(params.key)
