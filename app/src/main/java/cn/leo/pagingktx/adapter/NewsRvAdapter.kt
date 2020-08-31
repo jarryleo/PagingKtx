@@ -5,6 +5,7 @@ import cn.leo.paging_ktx.PagedListAdapterKtx
 import cn.leo.pagingktx.R
 import cn.leo.pagingktx.bean.News
 import cn.leo.pagingktx.image.loadImage
+import cn.leo.pagingktx.utils.dp
 
 /**
  * @author : ling luo
@@ -36,6 +37,6 @@ class NewsRvAdapter : PagedListAdapterKtx<News.StoriesBean>(
         }
         helper.setText(R.id.tv_title, data.title)
             .findViewById<ImageView>(R.id.iv_cover)
-            .loadImage(data.images?.get(0) ?: "")
+            .loadImage(data.images?.get(0) ?: "",corners = 6.dp)
     }
 }

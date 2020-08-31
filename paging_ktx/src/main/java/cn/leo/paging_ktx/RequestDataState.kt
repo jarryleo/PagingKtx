@@ -24,6 +24,6 @@ sealed class RequestDataState(open var isLoadMore: Boolean = false) {
      * @param isLoadMore 是否是分页的加载更多
      * @param exception 失败原因
      */
-    class FAILED(override var isLoadMore: Boolean = false, var exception: Exception? = null) :
+    class FAILED(override var isLoadMore: Boolean = false, var throwable: Throwable? = null) :
         RequestDataState(isLoadMore)
 }

@@ -47,6 +47,7 @@ class ZhiHuActivity : AppCompatActivity() {
         //val mergeAdapter = MergeAdapter(adapter, footer)
         rv_news.layoutManager = LinearLayoutManager(this)
         rv_news.adapter = adapter
+
         model.allNews.observe(this, Observer {
             adapter.submitList(it)
             srl_refresh.finishRefresh()
@@ -73,7 +74,7 @@ class ZhiHuActivity : AppCompatActivity() {
                     statePager.showContent()
                 }
                 is RequestDataState.FAILED -> {
-                    toast("加载失败：${it.exception?.message}")
+                    toast("加载失败：${it.throwable?.message}")
                     statePager.showError()
                 }
             }

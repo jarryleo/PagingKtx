@@ -1,7 +1,8 @@
-package cn.leo.pagingktx.net
+package cn.leo.retrofitktx.interceptor
 
 
 import android.util.Log
+import cn.leo.retrofitktx.utils.UrlUtil
 import okhttp3.Interceptor
 import okhttp3.RequestBody
 import okhttp3.Response
@@ -12,7 +13,6 @@ import java.nio.charset.Charset
 
 /**
  * @author lingluo
- * okhttp 请求日志打印拦截器
  */
 class LoggerInterceptor : Interceptor {
 
@@ -35,7 +35,7 @@ class LoggerInterceptor : Interceptor {
         //接口数据大于32K不显示
         if (buffer.size > 1024 * 32) {
             Log.d(
-                TAG, getBaseUrl(request.url.toString())
+                TAG, UrlUtil.getBaseUrl(request.url.toString())
                         + "请求返回：| (长度:" + buffer.size
                         + ")大于32K不打印,点击链接在网页查看"
             )
@@ -80,18 +80,7 @@ class LoggerInterceptor : Interceptor {
         Log.d(TAG, "请求参数：| $params")
     }
 
-    /**
-     * 拿到连接中除了参数的地址
-     */
-    private fun getBaseUrl(url: String): String {
-        //切分基础url和参数
-        val splitBp = url.split("\\?".toRegex(), 2).toTypedArray()
-        //拿到基础地址
-        return splitBp[0]
-    }
-
     companion object {
         var TAG = "LoggerInterceptor"
     }
-
 }

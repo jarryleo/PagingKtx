@@ -1,26 +1,34 @@
 package cn.leo.pagingktx.model
 
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import cn.leo.pagingktx.App
 import cn.leo.pagingktx.net.Apis
-import cn.leo.pagingktx.net.LoggerInterceptor
 import cn.leo.pagingktx.net.Urls
 import cn.leo.retrofit_ktx.http.OkHttp3Creator
-import cn.leo.retrofit_ktx.http.create
-import cn.leo.retrofit_ktx.view_model.KNetViewModel
+import cn.leo.retrofit_ktx.http.ServiceCreator
+import cn.leo.retrofitktx.interceptor.CacheInterceptor
+import cn.leo.retrofitktx.interceptor.LoggerInterceptor
 
 /**
  * @author : ling luo
- * @date : 2020/5/12
+ * @date : 2020/4/29
  */
-open class BaseViewModel : KNetViewModel<Apis>() {
+open class BaseViewModel : ViewModel() {
+    val loadingLiveData = MutableLiveData<Boolean>()
 
-    override fun getBaseUrl() = Urls.baseUrlZhiHu
-
-    override fun createApi(): Apis {
-        return Apis::class.java.create {
-            baseUrl = getBaseUrl()
-            httpClient = OkHttp3Creator.build {
-                //网络请求日志打印拦截器
-                interceptors.add(LoggerInterceptor())
+    companion object {
+        val api by lazy {
+            ServiceCreator.create(Apis::class.java) {
+                baseUrl = Urls.baseUrlZhiHu
+                httpClient = OkHttp3Creator.build {
+                    //缓存文件夹
+                    cacheDir = App.context?.cacheDir
+                    //网络请求日志打印拦截器
+                    addInterceptor(LoggerInterceptor())
+                    //接口缓存拦截器
+                    addInterceptor(CacheInterceptor())
+                }
             }
         }
     }

@@ -1,21 +1,5 @@
 package cn.leo.retrofit_ktx.http
 
-/*
- * Copyright (C) 2016 Square, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import retrofit2.*
@@ -41,11 +25,11 @@ import java.lang.reflect.Type
  * * Response wrapped body (e.g., `Deferred<Response<User>>`) returns a [Response] object for all
  * HTTP responses and throws [IOException][java.io.IOException] for network errors
  */
-class KJobAdapterFactory private constructor() : CallAdapter.Factory() {
+class CoroutineCallAdapterFactory private constructor() : CallAdapter.Factory() {
     companion object {
         @JvmStatic
         @JvmName("create")
-        operator fun invoke() = KJobAdapterFactory()
+        operator fun invoke() = CoroutineCallAdapterFactory()
     }
 
     override fun get(
@@ -53,7 +37,7 @@ class KJobAdapterFactory private constructor() : CallAdapter.Factory() {
         annotations: Array<out Annotation>,
         retrofit: Retrofit
     ): CallAdapter<*, *>? {
-        if (KJob::class.java != getRawType(returnType)) {
+        if (Deferred::class.java != getRawType(returnType)) {
             return null
         }
         if (returnType !is ParameterizedType) {
@@ -70,23 +54,19 @@ class KJobAdapterFactory private constructor() : CallAdapter.Factory() {
                     "Response must be parameterized as Response<Foo> or Response<out Foo>"
                 )
             }
-            ResponseCallAdapter<Any>(
-                getParameterUpperBound(0, responseType)
-            )
+            ResponseCallAdapter<Any>(getParameterUpperBound(0, responseType))
         } else {
-            BodyCallAdapter<Any>(
-                responseType
-            )
+            BodyCallAdapter<Any>(responseType)
         }
     }
 
-    private class BodyCallAdapter<T : Any>(
+    private class BodyCallAdapter<T>(
         private val responseType: Type
-    ) : CallAdapter<T, KJob<T>> {
+    ) : CallAdapter<T, Deferred<T>> {
 
         override fun responseType() = responseType
 
-        override fun adapt(call: Call<T>): KJob<T> {
+        override fun adapt(call: Call<T>): Deferred<T> {
             val deferred = CompletableDeferred<T>()
 
             deferred.invokeOnCompletion {
@@ -109,17 +89,17 @@ class KJobAdapterFactory private constructor() : CallAdapter.Factory() {
                 }
             })
 
-            return KJob(deferred)
+            return deferred
         }
     }
 
-    private class ResponseCallAdapter<T : Any>(
+    private class ResponseCallAdapter<T>(
         private val responseType: Type
-    ) : CallAdapter<T, KJob<Response<T>>> {
+    ) : CallAdapter<T, Deferred<Response<T>>> {
 
         override fun responseType() = responseType
 
-        override fun adapt(call: Call<T>): KJob<Response<T>> {
+        override fun adapt(call: Call<T>): Deferred<Response<T>> {
             val deferred = CompletableDeferred<Response<T>>()
 
             deferred.invokeOnCompletion {
@@ -138,7 +118,7 @@ class KJobAdapterFactory private constructor() : CallAdapter.Factory() {
                 }
             })
 
-            return KJob(deferred)
+            return deferred
         }
     }
 }

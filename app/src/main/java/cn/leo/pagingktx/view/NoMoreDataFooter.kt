@@ -10,7 +10,7 @@ import com.scwang.smartrefresh.layout.impl.RefreshFooterWrapper
  * @author : ling luo
  * @date : 2020/5/15
  */
-class NoMoreDateFooter(context: Context) : RefreshFooterWrapper(
+class NoMoreDataFooter(context: Context) : RefreshFooterWrapper(
     TextView(context).apply {
         gravity = Gravity.CENTER
         text = "加载更多。。。"

@@ -45,7 +45,9 @@ object ServiceCreator {
                 field = if (value.endsWith("/")) value else "$value/"
             }
         var httpClient = OkHttp3Creator.build()
-        val converterFactoryList = mutableListOf(GsonConverterFactory.create())
-        val callAdapterFactoryList = mutableListOf(KJobAdapterFactory())
+        val converterFactoryList =
+            mutableListOf(GsonConverterFactory.create())
+        val callAdapterFactoryList =
+            mutableListOf(CoroutineCallAdapterFactory())
     }
 }

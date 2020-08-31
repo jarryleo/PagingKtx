@@ -62,6 +62,7 @@ object OkHttp3Creator {
             set(value) {
                 field = if (value > 0) value else 30L
             }
+
         /**
          * 读取超时时间
          * 单位：秒
@@ -70,6 +71,7 @@ object OkHttp3Creator {
             set(value) {
                 field = if (value > 0) value else 30L
             }
+
         /**
          * 写入超时时间
          * 单位：秒
@@ -78,14 +80,17 @@ object OkHttp3Creator {
             set(value) {
                 field = if (value > 0) value else 30L
             }
+
         /**
          * 缓存目录
          */
         var cacheDir: File? = null
+
         /**
          * 缓存大小
          */
         var cacheSize: Long = 30 * 1024 * 1024
+
         /**
          * 支持https操作
          */
@@ -108,10 +113,17 @@ object OkHttp3Creator {
         }
         var sslSocketFactory: SSLSocketFactory? = null
         var hostnameVerifier: HostnameVerifier? = null
-        /**
-         * 拦截器
-         */
-        val interceptors = mutableListOf<Interceptor>()
 
+        /**
+         * 拦截器列表
+         */
+        internal val interceptors = mutableListOf<Interceptor>()
+
+        /**
+         * 添加拦截器
+         */
+        fun addInterceptor(interceptor: Interceptor) {
+            interceptors.add(interceptor)
+        }
     }
 }
