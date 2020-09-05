@@ -57,6 +57,14 @@ abstract class PagedListAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.V
 
 
     /**
+     * 异步提交数据
+     * @param commitCallback 数据提交回调
+     */
+    fun submit(data: List<T>, commitCallback: Runnable? = null) {
+        super.submitList(data.toPageList(), commitCallback)
+    }
+
+    /**
      * 给条目绑定数据
      *
      * @param helper  条目帮助类

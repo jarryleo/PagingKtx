@@ -50,8 +50,9 @@ class MainActivity : AppCompatActivity() {
         rv_user.itemAnimator = null
         model.allStudents.observe(this, Observer {
             statePager.showContent()
-            srl_refresh.finishRefresh()
             userRvAdapter.submitList(it)
+            srl_refresh.finishRefresh()
+            srl_refresh.setNoMoreData(true)
         })
         userRvAdapter.setOnItemClickListener { adapter, _, position ->
             val user = adapter.getData(position) as? User
