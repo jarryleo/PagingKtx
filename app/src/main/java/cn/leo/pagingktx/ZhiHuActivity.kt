@@ -41,6 +41,7 @@ class ZhiHuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_zhi_hu)
         initRv()
+        statePager.showLoading()
     }
 
     private fun initRv() {
@@ -68,7 +69,7 @@ class ZhiHuActivity : AppCompatActivity() {
             adapter.loadStateFlow.collectLatest {
                 when (it.refresh) {
                     is LoadState.Loading -> {
-                        statePager.showLoading()
+                        //statePager.showLoading()
                     }
                     is LoadState.NotLoading -> {
                         srl_refresh.finishRefresh(true)

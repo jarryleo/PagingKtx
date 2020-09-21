@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         //model.insert()
         initView()
-        userRvAdapter.refresh()
+        statePager.showLoading()
     }
 
     private fun initView() {
@@ -54,10 +54,11 @@ class MainActivity : AppCompatActivity() {
             userRvAdapter.loadStateFlow.collectLatest {
                 when (it.refresh) {
                     is LoadState.Loading -> {
-                        statePager.showLoading()
+                        //statePager.showLoading()
                     }
                     is LoadState.NotLoading -> {
                         srl_refresh.finishRefresh(true)
+                        srl_refresh.finishLoadMoreWithNoMoreData()
                         statePager.showContent()
                     }
                     is LoadState.Error -> {
