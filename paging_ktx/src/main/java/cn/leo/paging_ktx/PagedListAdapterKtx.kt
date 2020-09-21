@@ -9,7 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.*
 import androidx.core.app.ActivityCompat
-import androidx.paging.PagedListAdapter
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
  * @date : 2020/5/11
  */
 @Suppress("UNUSED", "MemberVisibilityCanBePrivate")
-abstract class PagedListAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.ViewHolder> {
+abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.ViewHolder> {
 
     constructor() : super(createDiffCallback())
 
@@ -55,14 +55,6 @@ abstract class PagedListAdapterKtx<T : Any> : PagedListAdapter<T, RecyclerView.V
     @LayoutRes
     protected abstract fun getItemLayout(position: Int): Int
 
-
-    /**
-     * 异步提交数据
-     * @param commitCallback 数据提交回调
-     */
-    fun submit(data: List<T>, commitCallback: Runnable? = null) {
-        super.submitList(data.toPageList(), commitCallback)
-    }
 
     /**
      * 给条目绑定数据

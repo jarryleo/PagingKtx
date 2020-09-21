@@ -6,19 +6,22 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import cn.leo.paging_ktx.RequestDataState
 import cn.leo.pagingktx.adapter.NewsRvAdapter
 import cn.leo.pagingktx.bean.News
 import cn.leo.pagingktx.model.ZhiHuNewsViewModel
-import cn.leo.pagingktx.utils.toast
 import cn.leo.pagingktx.view.StatusPager
 import cn.leo.retrofit_ktx.view_model.ViewModelCreator
 import kotlinx.android.synthetic.main.activity_zhi_hu.*
+import kotlinx.coroutines.flow.collectLatest
 
 class ZhiHuActivity : AppCompatActivity() {
 
     private val model by ViewModelCreator(ZhiHuNewsViewModel::class.java)
+
+    private val adapter by lazy { NewsRvAdapter() }
 
     private val statePager by lazy {
         StatusPager.builder(srl_refresh)
@@ -28,7 +31,7 @@ class ZhiHuActivity : AppCompatActivity() {
             .addRetryButtonId(R.id.btn_retry)
             .setRetryClickListener(object : StatusPager.OnClickListener {
                 override fun onClick(statusManager: StatusPager?, v: View?) {
-                    model.dataSourceFactory.refresh()
+                    adapter.refresh()
                 }
             })
             .build()
@@ -41,43 +44,41 @@ class ZhiHuActivity : AppCompatActivity() {
     }
 
     private fun initRv() {
-        statePager.showLoading()
-        val adapter = NewsRvAdapter()
-        //val footer = FooterAdapter() //底部加载中提示
-        //val mergeAdapter = MergeAdapter(adapter, footer)
         rv_news.layoutManager = LinearLayoutManager(this)
         rv_news.adapter = adapter
-
-        model.allNews.observe(this, Observer {
-            adapter.submitList(it)
-            srl_refresh.finishRefresh()
-        })
-
+        //点击事件
         adapter.setOnItemClickListener { a, _, position ->
             val news = a.getData(position) as? News.StoriesBean
             news?.let {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.url)))
             }
         }
-
         //设置下拉刷新
         srl_refresh.setOnRefreshListener {
-            model.dataSourceFactory.refresh()
+            adapter.refresh()
         }
-
-        //监听是否还有更多数据
-        model.dataSourceFactory.observer(this, Observer {
-            when (it) {
-                //is RequestDataState.LOADING -> if (!it.isLoadMore) srl_refresh.autoRefresh()
-                is RequestDataState.SUCCESS -> {
-                    srl_refresh.setNoMoreData(it.noMoreData)
-                    statePager.showContent()
-                }
-                is RequestDataState.FAILED -> {
-                    toast("加载失败：${it.throwable?.message}")
-                    statePager.showError()
-                }
+        //数据源
+        model.allNews.observe(this@ZhiHuActivity, Observer {
+            lifecycleScope.launchWhenCreated {
+                adapter.submitData(it)
             }
         })
+        //请求状态
+        lifecycleScope.launchWhenCreated {
+            adapter.loadStateFlow.collectLatest {
+                when (it.refresh) {
+                    is LoadState.Loading -> {
+                        statePager.showLoading()
+                    }
+                    is LoadState.NotLoading -> {
+                        srl_refresh.finishRefresh(true)
+                        statePager.showContent()
+                    }
+                    is LoadState.Error -> {
+                        statePager.showError()
+                    }
+                }
+            }
+        }
     }
 }

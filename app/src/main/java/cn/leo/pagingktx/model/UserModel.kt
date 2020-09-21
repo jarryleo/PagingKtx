@@ -1,9 +1,10 @@
 package cn.leo.pagingktx.model
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.paging.LivePagedListBuilder
-import androidx.paging.PagedList
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import cn.leo.pagingktx.db.DB
 import cn.leo.pagingktx.db.bean.User
 import cn.leo.pagingktx.db.helper.DbModelProperty
@@ -34,31 +35,10 @@ class UserModel : ViewModel() {
 
     private val db by DbModelProperty(DB::class.java)
 
-    private val config =
-        PagedList.Config.Builder()
-            .setPageSize(20)                         //配置分页加载的数量
-            .setEnablePlaceholders(true)             //配置是否启动PlaceHolders
-            .setPrefetchDistance(10)                 //预取数据的距离
-            .setInitialLoadSizeHint(20)              //初始化加载的数量
-            .build()
-
-    private val boundaryCallback =
-        object : PagedList.BoundaryCallback<User>() {
-            override fun onZeroItemsLoaded() {
-                Log.e("BoundaryCallback", "数据库为空！！")
-                insert()
-            }
-
-            override fun onItemAtEndLoaded(itemAtEnd: User) {
-                Log.e("BoundaryCallback", "数据库没有更多了！！${itemAtEnd.name}")
-                //insert() //请求网络加载数据
-            }
-        }
-
     val allStudents =
-        LivePagedListBuilder(db.userDao().getAllUser(), config)
-            .setBoundaryCallback(boundaryCallback)
-            .build()
+        Pager(PagingConfig(20)) {
+            db.userDao().getAllUser()
+        }.flow.asLiveData(viewModelScope.coroutineContext)
 
     //插入假数据
     fun insert() = io {
@@ -66,20 +46,12 @@ class UserModel : ViewModel() {
             User(0, it, Random.nextInt(2))
         }.toTypedArray()
         println("userList : ---------${userList.size}")
-        //db.userDao().delAll()
         db.userDao().insert(*userList)
     }
 
     //更新条目
     fun update(user: User) = io {
         db.runInTransaction { db.userDao().update(user) }
-    }
-
-    //刷新
-    fun refresh() = io {
-        Log.e("BoundaryCallback", "清空数据库！！")
-        //allStudents.value?.dataSource?.invalidate()
-        db.runInTransaction { db.userDao().delAll() }
     }
 
     override fun onCleared() {

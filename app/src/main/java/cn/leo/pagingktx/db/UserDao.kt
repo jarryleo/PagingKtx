@@ -1,7 +1,7 @@
 package cn.leo.pagingktx.db
 
 import androidx.lifecycle.LiveData
-import androidx.paging.DataSource
+import androidx.paging.PagingSource
 import androidx.room.*
 import cn.leo.pagingktx.db.bean.User
 
@@ -16,7 +16,7 @@ interface UserDao {
     fun getAll(): LiveData<List<User>>
 
     @Query("SELECT * FROM user")
-    fun getAllUser(): DataSource.Factory<Int, User>
+    fun getAllUser(): PagingSource<Int, User>
 
     @Query("SELECT * FROM user WHERE id = :id")
     //fun findUserById(id: Long): LiveData<User>
