@@ -137,11 +137,10 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
             itemView.setOnLongClickListener(this)
         }
 
-        var mPosition = 0
+        val mPosition get() = absoluteAdapterPosition
 
         fun onBindViewHolder(position: Int, payloads: MutableList<Any>? = null) {
-            mPosition = position
-            bindData(itemHelper, getItem(mPosition), payloads)
+            bindData(itemHelper, getItem(position), payloads)
         }
 
         override fun onClick(v: View) {
