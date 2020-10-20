@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/11
  */
 @Suppress("UNUSED", "MemberVisibilityCanBePrivate")
@@ -55,7 +55,6 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
     @LayoutRes
     protected abstract fun getItemLayout(position: Int): Int
 
-
     /**
      * 给条目绑定数据
      *
@@ -74,7 +73,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as? PagedListAdapterKtx<out Any>.ViewHolder)?.onBindViewHolder(position)
+        (holder as? PagedListAdapterKtx<*>.ViewHolder)?.onBindViewHolder(position)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -103,7 +102,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
             if (itemHolder != null) {
                 itemHolder.bindData(helper, item, payloads)
             } else {
-                (holder as? PagedListAdapterKtx<out Any>.ViewHolder)?.onBindViewHolder(
+                (holder as? PagedListAdapterKtx<*>.ViewHolder)?.onBindViewHolder(
                     position,
                     payloads
                 )
@@ -158,7 +157,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         }
     }
 
-    class ItemHelper(private val viewHolder: PagedListAdapterKtx<out Any>.ViewHolder) :
+    class ItemHelper(private val viewHolder: PagedListAdapterKtx<*>.ViewHolder) :
         View.OnClickListener, View.OnLongClickListener {
         private val viewCache = SparseArray<View>()
         private val clickListenerCache = ArrayList<Int>()
@@ -170,8 +169,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         @LayoutRes
         @get:LayoutRes
         var itemLayoutResId: Int = 0
-        val position
-            get() = viewHolder.absoluteAdapterPosition
+        val position get() = viewHolder.absoluteAdapterPosition
         val itemView: View = viewHolder.itemView
         val context: Context = itemView.context
         var tag: Any? = null
@@ -302,7 +300,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         fun setTextColorRes(@IdRes viewId: Int, @ColorRes colorResId: Int): ItemHelper {
             getViewById<View>(viewId) {
                 if (it is TextView) {
-                    ActivityCompat.getColor(context, colorResId)
+                    it.setTextColor(ActivityCompat.getColor(context, colorResId))
                 } else {
                     val entryName = it.resources.getResourceEntryName(viewId)
                     throw ClassCastException("id: R.id.$entryName are not TextView")
@@ -444,7 +442,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         var mItemHolder: ItemHolder<Any>? = null
 
         @Suppress("UNCHECKED_CAST")
-        fun setItemHolder(itemHolderClass: Class<out ItemHolder<out Any>>) {
+        fun setItemHolder(itemHolderClass: Class<out ItemHolder<out Any>>): ItemHolder<Any>? {
             try {
                 if (mItemHolder == null) {
                     val newInstance = itemHolderClass.newInstance()
@@ -457,7 +455,15 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
             } catch (e: IllegalAccessException) {
                 e.printStackTrace()
             }
+            return mItemHolder
+        }
 
+        fun setItemHolder(itemHolder: ItemHolder<*>) {
+            if (mItemHolder == null) {
+                mItemHolder = itemHolder as? ItemHolder<Any>
+                mItemHolder?.initView(this, adapter.getItem(position))
+            }
+            mItemHolder?.bindData(this, adapter.getItem(position))
         }
     }
 
