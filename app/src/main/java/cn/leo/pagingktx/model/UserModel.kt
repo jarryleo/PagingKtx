@@ -5,6 +5,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import cn.leo.pagingktx.db.DB
 import cn.leo.pagingktx.db.bean.User
 import cn.leo.pagingktx.db.helper.DbModelProperty
@@ -38,7 +39,10 @@ class UserModel : ViewModel() {
     val allStudents =
         Pager(PagingConfig(20)) {
             db.userDao().getAllUser()
-        }.flow.asLiveData(viewModelScope.coroutineContext)
+        }
+            .flow
+            .cachedIn(viewModelScope)
+            .asLiveData(viewModelScope.coroutineContext)
 
     //插入假数据
     fun insert() = io {

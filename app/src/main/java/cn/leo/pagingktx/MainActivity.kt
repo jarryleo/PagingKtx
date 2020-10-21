@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //model.insert()
+        model.insert()  //第一次运行插入假数据
         initView()
         statePager.showLoading()
     }
@@ -54,7 +55,7 @@ class MainActivity : AppCompatActivity() {
             userRvAdapter.loadStateFlow.collectLatest {
                 when (it.refresh) {
                     is LoadState.Loading -> {
-                        //statePager.showLoading()
+                        statePager.showLoading()
                     }
                     is LoadState.NotLoading -> {
                         srl_refresh.finishRefresh(true)

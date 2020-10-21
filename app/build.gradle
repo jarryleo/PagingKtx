@@ -44,9 +44,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     //生命周期辅助ktx
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0-alpha07'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-alpha07'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.0-alpha07'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0-beta01'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.0-beta01'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.0-beta01'
     //junit
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
@@ -69,8 +69,8 @@ dependencies {
     //paging
     //implementation 'androidx.paging:paging-common:2.1.2'
     //implementation 'androidx.paging:paging-common-ktx:2.1.2'
-    implementation 'androidx.paging:paging-runtime:3.0.0-alpha06'
-    implementation 'androidx.paging:paging-runtime-ktx:3.0.0-alpha06'
+    //implementation 'androidx.paging:paging-runtime:3.0.0-alpha07'
+    implementation 'androidx.paging:paging-runtime-ktx:3.0.0-alpha07'
     implementation project(path: ':paging_ktx')
 
     //测试谷歌新的MergeAdapter
