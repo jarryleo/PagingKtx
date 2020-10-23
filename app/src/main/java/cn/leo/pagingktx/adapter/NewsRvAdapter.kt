@@ -35,6 +35,10 @@ class NewsRvAdapter : PagedListAdapterKtx<News.StoriesBean>(
         if (data == null) {
             return
         }
+        if (!payloads.isNullOrEmpty()){
+            helper.setText(R.id.tv_title, data.title)
+            return
+        }
         helper.setText(R.id.tv_title, data.title)
             .findViewById<ImageView>(R.id.iv_cover)
             .loadImage(data.images?.get(0) ?: "",corners = 6.dp)

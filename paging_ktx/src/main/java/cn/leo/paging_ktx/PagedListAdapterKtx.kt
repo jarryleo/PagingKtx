@@ -85,6 +85,16 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
     }
 
     /**
+     * 条目编辑
+     * @param position 条目索引
+     * @param payload 局部刷新
+     */
+    fun edit(position: Int, payload: Any? = null, block: (T?) -> Unit) {
+        block(getData(position))
+        notifyItemChanged(position, payload)
+    }
+
+    /**
      * 局部刷新
      */
     override fun onBindViewHolder(

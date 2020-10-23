@@ -62,11 +62,9 @@ class ZhiHuActivity : AppCompatActivity() {
         srl_refresh.setOnLoadMoreListener {
             adapter.retry()
         }
-        //数据源
-        model.allNews.observe(this@ZhiHuActivity, Observer {
-            lifecycleScope.launchWhenCreated {
-                adapter.submitData(it)
-            }
+        //绑定数据源
+        model.allNews.observe(this, Observer {
+            adapter.submitData(this.lifecycle,it)
         })
         //请求状态
         //因为刷新前也会调用LoadState.NotLoading，所以用一个外部变量判断是否是刷新后
