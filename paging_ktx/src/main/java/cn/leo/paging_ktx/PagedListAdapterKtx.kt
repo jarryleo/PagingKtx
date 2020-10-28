@@ -179,7 +179,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         @LayoutRes
         @get:LayoutRes
         var itemLayoutResId: Int = 0
-        val position get() = viewHolder.absoluteAdapterPosition
+        val position get() = viewHolder.bindingAdapterPosition
         val itemView: View = viewHolder.itemView
         val context: Context = itemView.context
         var tag: Any? = null
