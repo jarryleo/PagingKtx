@@ -8,8 +8,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.*
+import androidx.annotation.IntRange
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Lifecycle
+import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
+import androidx.paging.filter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
@@ -17,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
  * @author : leo
  * @date : 2020/5/11
  */
-@Suppress("UNUSED", "MemberVisibilityCanBePrivate")
+@Suppress("UNUSED","UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
 abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.ViewHolder> {
 
     constructor() : super(createDiffCallback())
@@ -85,14 +89,78 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
     }
 
     /**
-     * 条目编辑
+     * 保存提交的数据集
+     */
+    protected var mPagingData: PagingData<T>? = null
+
+    /**
+     * 采用setPagingData 可以动态增减数据
+     */
+    suspend fun setPagingData(pagingData: PagingData<T>) {
+        mPagingData = pagingData
+        submitData(pagingData)
+    }
+
+    /**
+     * 采用setPagingData 可以动态增减数据
+     */
+    fun setPagingData(lifecycle: Lifecycle, pagingData: PagingData<T>) {
+        mPagingData = pagingData
+        submitData(lifecycle, pagingData)
+    }
+
+    /**
+     * 向尾部添加数据
+     */
+    suspend fun appendItem(item: T) {
+        if (mPagingData == null) {
+            throw IllegalArgumentException("To add data, you must use the 'setPagingData' method")
+        }
+        mPagingData = mPagingData?.insertFooterItem(item)
+        mPagingData?.let {
+            submitData(it)
+        }
+    }
+
+    /**
+     * 向首部添加数据
+     */
+    suspend fun prependItem(item: T) {
+        if (mPagingData == null) {
+            throw IllegalArgumentException("To add data, you must use the 'setPagingData' method")
+        }
+        mPagingData = mPagingData?.insertHeaderItem(item)
+        mPagingData?.let {
+            submitData(it)
+        }
+    }
+
+    /**
+     * 移除过滤数据
+     */
+    suspend fun filterItem(predicate: suspend (T) -> Boolean) {
+        if (mPagingData == null) {
+            throw IllegalArgumentException("To filter data, you must use the 'setPagingData' method")
+        }
+        mPagingData = mPagingData?.filter(predicate)
+        mPagingData?.let {
+            submitData(it)
+        }
+    }
+
+    /**
+     * 修改条目内容
      * @param position 条目索引
      * @param payload 局部刷新
      */
-    fun edit(position: Int, payload: Any? = null, block: (T?) -> Unit) {
+    fun edit(@IntRange(from = 0) position: Int, payload: Any? = null, block: (T?) -> Unit = {}) {
+        if (position >= itemCount) {
+            return
+        }
         block(getData(position))
         notifyItemChanged(position, payload)
     }
+
 
     /**
      * 局部刷新
