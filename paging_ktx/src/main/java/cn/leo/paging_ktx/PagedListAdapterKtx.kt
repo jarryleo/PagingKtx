@@ -21,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
  * @author : leo
  * @date : 2020/5/11
  */
-@Suppress("UNUSED","UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
+@Suppress("UNUSED", "UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
 abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.ViewHolder> {
 
     constructor() : super(createDiffCallback())
@@ -91,20 +91,18 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
     /**
      * 保存提交的数据集
      */
-    protected var mPagingData: PagingData<T>? = null
+    protected lateinit var mPagingData: PagingData<T>
 
     /**
-     * 采用setPagingData 可以动态增减数据
+     * 生命周期
      */
-    suspend fun setPagingData(pagingData: PagingData<T>) {
-        mPagingData = pagingData
-        submitData(pagingData)
-    }
+    protected lateinit var mLifecycle: Lifecycle
 
     /**
      * 采用setPagingData 可以动态增减数据
      */
     fun setPagingData(lifecycle: Lifecycle, pagingData: PagingData<T>) {
+        mLifecycle = lifecycle
         mPagingData = pagingData
         submitData(lifecycle, pagingData)
     }
@@ -112,40 +110,35 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
     /**
      * 向尾部添加数据
      */
-    suspend fun appendItem(item: T) {
-        if (mPagingData == null) {
+    fun appendItem(item: T) {
+        if (!this::mPagingData.isInitialized || !this::mLifecycle.isInitialized) {
             throw IllegalArgumentException("To add data, you must use the 'setPagingData' method")
         }
-        mPagingData = mPagingData?.insertFooterItem(item)
-        mPagingData?.let {
-            submitData(it)
-        }
+        mPagingData = mPagingData.insertFooterItem(item)
+        submitData(mLifecycle, mPagingData)
     }
 
     /**
      * 向首部添加数据
      */
-    suspend fun prependItem(item: T) {
-        if (mPagingData == null) {
+    fun prependItem(item: T) {
+        if (!this::mPagingData.isInitialized || !this::mLifecycle.isInitialized) {
             throw IllegalArgumentException("To add data, you must use the 'setPagingData' method")
         }
-        mPagingData = mPagingData?.insertHeaderItem(item)
-        mPagingData?.let {
-            submitData(it)
-        }
+        mPagingData = mPagingData.insertHeaderItem(item)
+        submitData(mLifecycle, mPagingData)
     }
 
     /**
      * 移除过滤数据
+     * @param predicate 条件为false的移除，为true的保留
      */
-    suspend fun filterItem(predicate: suspend (T) -> Boolean) {
-        if (mPagingData == null) {
+    fun filterItem(predicate: suspend (T) -> Boolean) {
+        if (!this::mPagingData.isInitialized || !this::mLifecycle.isInitialized) {
             throw IllegalArgumentException("To filter data, you must use the 'setPagingData' method")
         }
-        mPagingData = mPagingData?.filter(predicate)
-        mPagingData?.let {
-            submitData(it)
-        }
+        mPagingData = mPagingData.filter(predicate)
+        submitData(mLifecycle, mPagingData)
     }
 
     /**
