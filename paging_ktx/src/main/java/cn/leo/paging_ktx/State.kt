@@ -7,6 +7,6 @@ package cn.leo.paging_ktx
  */
 sealed class State {
     object Loading : State()
-    class Finished(val noMoreData: Boolean) : State()
+    class Success(val noMoreData: Boolean) : State()
     object Error : State()
 }

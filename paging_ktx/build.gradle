@@ -12,9 +12,5 @@ android {
 }
 
 dependencies {
-    //paging
-    //compileOnly 'androidx.paging:paging-common:2.1.2'
-    //compileOnly 'androidx.paging:paging-common-ktx:2.1.2'
-    compileOnly 'androidx.paging:paging-runtime:3.0.0-alpha07'
-    compileOnly 'androidx.paging:paging-runtime-ktx:3.0.0-alpha07'
+    implementation 'androidx.paging:paging-runtime-ktx:3.0.0-alpha08'
 }

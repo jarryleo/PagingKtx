@@ -3,22 +3,25 @@ package cn.leo.pagingktx
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.leo.paging_ktx.SimplePagingAdapter
 import cn.leo.paging_ktx.State
 import cn.leo.pagingktx.adapter.NewsHolder
 import cn.leo.pagingktx.bean.NewsBean
-import cn.leo.pagingktx.model.ZhiHuNewsViewModel
+import cn.leo.pagingktx.model.NewsViewModel
 import cn.leo.pagingktx.view.StatusPager
 import cn.leo.retrofit_ktx.view_model.ViewModelCreator
 import com.scwang.smartrefresh.layout.constant.RefreshState
 import kotlinx.android.synthetic.main.activity_zhi_hu.*
+import kotlinx.coroutines.flow.collectLatest
 
 class ZhiHuActivity : AppCompatActivity() {
 
-    private val model by ViewModelCreator(ZhiHuNewsViewModel::class.java)
+    private val model by ViewModelCreator(NewsViewModel::class.java)
 
     private val adapter by lazy { SimplePagingAdapter(NewsHolder()) }
 
@@ -60,9 +63,11 @@ class ZhiHuActivity : AppCompatActivity() {
             adapter.retry()
         }
         //绑定数据源
-        model.allNews.observe(this, Observer {
-            adapter.setData(this.lifecycle, it)
-        })
+        lifecycleScope.launchWhenCreated {
+            model.allNews.collectLatest {
+                adapter.setData(this@ZhiHuActivity.lifecycle, it)
+            }
+        }
         //请求状态
         adapter.setOnRefreshStateListener {
             when (it) {
@@ -73,7 +78,7 @@ class ZhiHuActivity : AppCompatActivity() {
                     }
                     srl_refresh.resetNoMoreData()
                 }
-                is State.Finished -> {
+                is State.Success -> {
                     statePager.showContent()
                     srl_refresh.finishRefresh(true)
                     srl_refresh.setNoMoreData(it.noMoreData)
@@ -91,7 +96,7 @@ class ZhiHuActivity : AppCompatActivity() {
                     //重置上拉加载状态，显示加载loading
                     srl_refresh.resetNoMoreData()
                 }
-                is State.Finished -> {
+                is State.Success -> {
                     if (it.noMoreData) {
                         //没有更多了(只能用source的append)
                         srl_refresh.finishLoadMoreWithNoMoreData()
@@ -104,5 +109,18 @@ class ZhiHuActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_zhihu -> startActivity(Intent(this, MainActivity::class.java))
+        }
+        return true
     }
 }

@@ -9,7 +9,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 /**
- * @author : leo
+ * @author : ling luo
  * @date : 2019-12-03
  */
 @Suppress("UNCHECKED_CAST", "UNUSED")
@@ -17,7 +17,7 @@ object RoomHelper {
     /**
      * 数据库名称，自定义
      */
-    private const val DB_NAME = "db_name"
+    const val DB_NAME = "db_name"
 
     /**
      * 数据库对象缓存
@@ -27,18 +27,19 @@ object RoomHelper {
     /**
      * 实例化数据库对象
      */
-    fun <T : RoomDatabase> getDb(context: Context, clazz: Class<T>): T {
+    fun <T : RoomDatabase> getDb(context: Context, clazz: Class<T>, dbName: String = DB_NAME): T {
         val db = dbCache[clazz] as? T
-        if (db != null ) {
-            if (db.isOpen){
+        if (db != null) {
+            if (db.isOpen) {
                 return db
-            }else{
+            } else {
                 dbCache.remove(clazz)
             }
         }
-        return Room.databaseBuilder(
-            context, clazz, DB_NAME
-        ).build().also { dbCache[clazz] = it }
+        return Room.databaseBuilder(context, clazz, dbName)
+            .fallbackToDestructiveMigration()
+            .build()
+            .also { dbCache[clazz] = it }
     }
 
     /**
@@ -68,17 +69,23 @@ object RoomHelper {
 /**
  * 数据库委托
  */
-class DbProperty<T : RoomDatabase>(private val clazz: Class<T>) : ReadOnlyProperty<Context, T> {
+class DbProperty<T : RoomDatabase>(
+    private val clazz: Class<T>,
+    private val dbName: String = RoomHelper.DB_NAME
+) : ReadOnlyProperty<Context, T> {
     override fun getValue(thisRef: Context, property: KProperty<*>): T {
-        return RoomHelper.getDb(thisRef, clazz)
+        return RoomHelper.getDb(thisRef, clazz, dbName)
     }
 }
 
 /**
  * 数据库委托
  */
-class DbModelProperty<T : RoomDatabase>(private val clazz: Class<T>) : ReadOnlyProperty<Any, T> {
+class DbModelProperty<T : RoomDatabase>(
+    private val clazz: Class<T>,
+    private val dbName: String = RoomHelper.DB_NAME
+) : ReadOnlyProperty<Any, T> {
     override fun getValue(thisRef: Any, property: KProperty<*>): T {
-        return RoomHelper.getDb(App.context!!, clazz)
+        return RoomHelper.getDb(App.context!!, clazz, dbName)
     }
 }

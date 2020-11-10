@@ -7,7 +7,7 @@ import cn.leo.paging_ktx.DifferData
  * @date : 2020/5/12
  */
 data class NewsBean(
-    var date: String = "",
+    var date: String? = "",
     var stories: List<StoriesBean> = emptyList()
 ) {
 

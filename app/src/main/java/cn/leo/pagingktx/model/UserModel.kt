@@ -9,7 +9,8 @@ import androidx.paging.cachedIn
 import cn.leo.pagingktx.db.DB
 import cn.leo.pagingktx.db.bean.User
 import cn.leo.pagingktx.db.helper.DbModelProperty
-import cn.leo.retrofit_ktx.utils.io
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 /**
@@ -37,15 +38,13 @@ class UserModel : ViewModel() {
     private val db by DbModelProperty(DB::class.java)
 
     val allStudents =
-        Pager(PagingConfig(20)) {
-            db.userDao().getAllUser()
-        }
+        Pager(PagingConfig(20)) { db.userDao().getAllUser() }
             .flow
             .cachedIn(viewModelScope)
             .asLiveData(viewModelScope.coroutineContext)
 
     //插入假数据
-    fun insert() = io {
+    fun insert() = viewModelScope.launch(Dispatchers.IO) {
         val userList = CHEESE_DATA.map {
             User(0, it, Random.nextInt(2))
         }.toTypedArray()
@@ -58,7 +57,7 @@ class UserModel : ViewModel() {
     }
 
     //更新条目
-    fun update(user: User) = io {
+    fun update(user: User) = viewModelScope.launch(Dispatchers.IO) {
         db.runInTransaction { db.userDao().update(user) }
     }
 

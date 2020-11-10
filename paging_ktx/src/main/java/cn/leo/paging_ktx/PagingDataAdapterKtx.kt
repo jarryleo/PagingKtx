@@ -657,9 +657,6 @@ abstract class PagingDataAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView
      */
     private lateinit var mOnPrependStateListener: (State) -> Unit
 
-    //是否执行了loading
-    var hasLoading = false
-
     init {
         addLoadStateListener {
             if (::mOnRefreshStateListener.isInitialized) {
@@ -693,13 +690,10 @@ abstract class PagingDataAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView
     ) {
         when (loadState) {
             is LoadState.Loading -> {
-                hasLoading = true
                 stateListener(State.Loading)
             }
             is LoadState.NotLoading -> {
-                if (hasLoading) {
-                    stateListener(State.Finished(noMoreData))
-                }
+                stateListener(State.Success(noMoreData))
             }
             is LoadState.Error -> {
                 stateListener(State.Error)

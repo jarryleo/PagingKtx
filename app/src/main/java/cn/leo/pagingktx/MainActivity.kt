@@ -1,13 +1,11 @@
 package cn.leo.pagingktx
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.paging.LoadState
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.leo.paging_ktx.State
 import cn.leo.pagingktx.adapter.FooterAdapter
 import cn.leo.pagingktx.adapter.UserRvAdapter
 import cn.leo.pagingktx.db.bean.User
@@ -34,9 +32,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        model.insert()  //第一次运行插入假数据
-        initView()
         statePager.showLoading()
+        model.insert().invokeOnCompletion {
+            lifecycleScope.launchWhenCreated { initView() }
+        }
     }
 
     private fun initView() {
@@ -48,20 +47,13 @@ class MainActivity : AppCompatActivity() {
             userRvAdapter.submitData(this.lifecycle, it)
         })
         //刷新状态
-        var hasRefreshing = false
-        userRvAdapter.addLoadStateListener {
-            when (it.refresh) {
-                is LoadState.Loading -> {
-                    hasRefreshing = true
+        userRvAdapter.setOnRefreshStateListener {
+            when (it) {
+                is State.Success -> {
+                    statePager.showContent()
+                    srl_refresh.finishRefresh(true)
                 }
-                is LoadState.NotLoading -> {
-                    if (hasRefreshing) {
-                        hasRefreshing = false
-                        statePager.showContent()
-                        srl_refresh.finishRefresh(true)
-                    }
-                }
-                is LoadState.Error -> {
+                is State.Error -> {
                     srl_refresh.finishRefresh(false)
                 }
             }
@@ -78,19 +70,5 @@ class MainActivity : AppCompatActivity() {
         srl_refresh.setOnRefreshListener {
             userRvAdapter.refresh()
         }
-
     }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menu_zhihu -> startActivity(Intent(this, ZhiHuActivity::class.java))
-        }
-        return true
-    }
-
 }

@@ -1,6 +1,5 @@
 package cn.leo.pagingktx.model
 
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -14,7 +13,7 @@ import java.util.*
  * @author : leo
  * @date : 2020/5/12
  */
-class ZhiHuNewsViewModel : BaseViewModel() {
+class NewsViewModel : BaseViewModel() {
 
     private val mDate = Calendar.getInstance().apply {
         add(Calendar.DATE, 1)
@@ -31,14 +30,12 @@ class ZhiHuNewsViewModel : BaseViewModel() {
                     val date = params.key ?: initialKey
                     return try {
                         val data = api.getNews(date).await()
-                        LoadResult.Page(data.stories, null, data.date.toLong())
+                        LoadResult.Page(data.stories, null, data.date?.toLongOrNull())
                     } catch (e: Exception) {
                         LoadResult.Error(e)
                     }
                 }
             }
-        }
-            .flow
-            .cachedIn(viewModelScope)
-            .asLiveData(viewModelScope.coroutineContext)
+        }.flow.cachedIn(viewModelScope)
+    //.asLiveData(viewModelScope.coroutineContext)
 }
