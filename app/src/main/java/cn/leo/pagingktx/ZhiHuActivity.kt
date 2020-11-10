@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import cn.leo.pagingktx.adapter.NewsRvAdapter
@@ -64,7 +63,7 @@ class ZhiHuActivity : AppCompatActivity() {
         }
         //绑定数据源
         model.allNews.observe(this, Observer {
-            adapter.submitData(this.lifecycle,it)
+            adapter.submitData(this.lifecycle, it)
         })
         //请求状态
         //因为刷新前也会调用LoadState.NotLoading，所以用一个外部变量判断是否是刷新后
@@ -77,6 +76,7 @@ class ZhiHuActivity : AppCompatActivity() {
                     if (srl_refresh.state != RefreshState.Refreshing) {
                         statePager.showLoading()
                     }
+                    srl_refresh.resetNoMoreData()
                 }
                 is LoadState.NotLoading -> {
                     if (hasRefreshing) {
@@ -84,9 +84,10 @@ class ZhiHuActivity : AppCompatActivity() {
                         statePager.showContent()
                         srl_refresh.finishRefresh(true)
                         //如果第一页数据就没有更多了，则展示没有更多了
-                        if (it.source.append.endOfPaginationReached){
+                        if (it.source.append.endOfPaginationReached) {
                             //没有更多了(只能用source的append)
                             srl_refresh.finishLoadMoreWithNoMoreData()
+                            srl_refresh.setNoMoreData(true)
                         }
                     }
                 }
@@ -109,10 +110,10 @@ class ZhiHuActivity : AppCompatActivity() {
                 is LoadState.NotLoading -> {
                     if (hasLoadingMore) {
                         hasLoadingMore = false
-                        if (it.source.append.endOfPaginationReached){
+                        if (it.source.append.endOfPaginationReached) {
                             //没有更多了(只能用source的append)
                             srl_refresh.finishLoadMoreWithNoMoreData()
-                        }else{
+                        } else {
                             srl_refresh.finishLoadMore(true)
                         }
                     }
