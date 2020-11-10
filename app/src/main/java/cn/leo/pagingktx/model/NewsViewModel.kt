@@ -25,7 +25,8 @@ class NewsViewModel : BaseViewModel() {
         object : SimplePager<Long, NewsBean.StoriesBean>(20, initialKey) {
             override suspend fun loadData(params: PagingSource.LoadParams<Long>):
                     PagingSource.LoadResult<Long, NewsBean.StoriesBean> {
-                val date = params.key ?: initialKey
+                val date =
+                    params.key ?: return PagingSource.LoadResult.Page(emptyList(), null, null)
                 return try {
                     val data = api.getNews(date).await()
                     PagingSource.LoadResult.Page(data.stories, null, data.date?.toLongOrNull())
