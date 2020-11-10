@@ -1,10 +1,8 @@
 package cn.leo.pagingktx.model
 
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
-import androidx.paging.cachedIn
+import cn.leo.paging_ktx.SimplePager
 import cn.leo.pagingktx.bean.NewsBean
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,19 +21,19 @@ class NewsViewModel : BaseViewModel() {
         .format(mDate.time)
         .toLong()
 
-    val allNews =
-        Pager(PagingConfig(20), initialKey = initialKey) {
-            object : PagingSource<Long, NewsBean.StoriesBean>() {
-                override suspend fun load(params: LoadParams<Long>): LoadResult<Long, NewsBean.StoriesBean> {
-                    val date = params.key ?: initialKey
-                    return try {
-                        val data = api.getNews(date).await()
-                        LoadResult.Page(data.stories, null, data.date?.toLongOrNull())
-                    } catch (e: Exception) {
-                        LoadResult.Error(e)
-                    }
+    private val pager =
+        object : SimplePager<Long, NewsBean.StoriesBean>(20, initialKey) {
+            override suspend fun loadData(params: PagingSource.LoadParams<Long>):
+                    PagingSource.LoadResult<Long, NewsBean.StoriesBean> {
+                val date = params.key ?: initialKey
+                return try {
+                    val data = api.getNews(date).await()
+                    PagingSource.LoadResult.Page(data.stories, null, data.date?.toLongOrNull())
+                } catch (e: Exception) {
+                    PagingSource.LoadResult.Error(e)
                 }
             }
-        }.flow.cachedIn(viewModelScope)
-    //.asLiveData(viewModelScope.coroutineContext)
+        }
+
+    val data = pager.getData(viewModelScope)
 }

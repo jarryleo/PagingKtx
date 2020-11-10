@@ -64,7 +64,7 @@ class ZhiHuActivity : AppCompatActivity() {
         }
         //绑定数据源
         lifecycleScope.launchWhenCreated {
-            model.allNews.collectLatest {
+            model.data.collectLatest {
                 adapter.setData(this@ZhiHuActivity.lifecycle, it)
             }
         }
