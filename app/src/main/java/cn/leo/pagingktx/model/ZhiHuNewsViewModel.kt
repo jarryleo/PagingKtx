@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/12
  */
 class ZhiHuNewsViewModel : BaseViewModel() {

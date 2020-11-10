@@ -6,7 +6,7 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/12
  */
 

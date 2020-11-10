@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import cn.leo.pagingktx.R
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/12
  */
 class FooterAdapter : RecyclerView.Adapter<FooterAdapter.FooterHolder>() {

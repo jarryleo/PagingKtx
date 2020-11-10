@@ -1,7 +1,7 @@
 package cn.leo.retrofitktx.bean
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-08-30
  */
 open class BaseBean<T>(

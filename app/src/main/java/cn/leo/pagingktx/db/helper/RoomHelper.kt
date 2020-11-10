@@ -9,7 +9,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-12-03
  */
 @Suppress("UNCHECKED_CAST", "UNUSED")

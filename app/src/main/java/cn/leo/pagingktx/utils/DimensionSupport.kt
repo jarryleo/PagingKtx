@@ -4,7 +4,7 @@ import android.content.res.Resources
 import kotlin.math.roundToInt
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-11-29
  */
 

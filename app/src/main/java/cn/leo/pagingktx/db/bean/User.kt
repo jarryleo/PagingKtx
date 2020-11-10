@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-12-03
  */
 @Entity(tableName = "user")

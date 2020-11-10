@@ -8,7 +8,7 @@ import com.scwang.smartrefresh.layout.footer.ClassicsFooter
 import com.scwang.smartrefresh.layout.header.ClassicsHeader
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/11
  */
 class App : Application() {

@@ -5,7 +5,7 @@ import cn.leo.pagingktx.R
 import cn.leo.pagingktx.db.bean.User
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/11
  */
 class UserRvAdapter : PagedListAdapterKtx<User>(

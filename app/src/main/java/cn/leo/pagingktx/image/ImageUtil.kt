@@ -26,7 +26,7 @@ import com.bumptech.glide.request.transition.Transition
 import java.io.File
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-08-31
  * @desc glide 加载图片封装
  */

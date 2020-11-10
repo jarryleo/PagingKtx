@@ -3,7 +3,7 @@ package cn.leo.retrofitktx.exceptions
 import androidx.annotation.IntDef
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-04-26
  */
 object CodeException {

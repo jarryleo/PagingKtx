@@ -6,7 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/12
  */
 interface Apis {

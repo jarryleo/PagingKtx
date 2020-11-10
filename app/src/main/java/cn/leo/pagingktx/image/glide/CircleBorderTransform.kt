@@ -11,7 +11,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-12-30
  * @desc : "带外圆环的圆形图片"
  */

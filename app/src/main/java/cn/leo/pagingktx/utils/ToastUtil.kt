@@ -6,7 +6,7 @@ import androidx.annotation.StringRes
 import cn.leo.pagingktx.App
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-07-04
  */
 

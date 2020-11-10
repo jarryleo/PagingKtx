@@ -1,7 +1,7 @@
 package cn.leo.pagingktx.net
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/12
  */
 object Urls {

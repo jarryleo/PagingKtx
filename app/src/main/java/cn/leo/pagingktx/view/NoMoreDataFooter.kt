@@ -7,7 +7,7 @@ import cn.leo.pagingktx.utils.dp
 import com.scwang.smartrefresh.layout.impl.RefreshFooterWrapper
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/15
  */
 class NoMoreDataFooter(context: Context) : RefreshFooterWrapper(

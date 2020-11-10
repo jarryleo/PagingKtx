@@ -1,7 +1,7 @@
 package cn.leo.retrofitktx.utils
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019/4/18
  */
 object HexUtil {

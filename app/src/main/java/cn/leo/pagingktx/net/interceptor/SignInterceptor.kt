@@ -9,7 +9,7 @@ import java.io.IOException
 import java.util.*
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019/4/18
  * 公共参数签名拦截器
  */

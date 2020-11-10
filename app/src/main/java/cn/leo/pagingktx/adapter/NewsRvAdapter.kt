@@ -8,7 +8,7 @@ import cn.leo.pagingktx.image.loadImage
 import cn.leo.pagingktx.utils.dp
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/11
  */
 class NewsRvAdapter : PagedListAdapterKtx<News.StoriesBean>(

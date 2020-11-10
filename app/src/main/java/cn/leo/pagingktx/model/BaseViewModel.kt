@@ -8,10 +8,10 @@ import cn.leo.pagingktx.net.Urls
 import cn.leo.retrofit_ktx.http.OkHttp3Creator
 import cn.leo.retrofit_ktx.http.ServiceCreator
 import cn.leo.retrofitktx.interceptor.CacheInterceptor
-import cn.leo.retrofitktx.interceptor.LoggerInterceptor
+import cn.leo.pagingktx.net.interceptor.LoggerInterceptor
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/4/29
  */
 open class BaseViewModel : ViewModel() {

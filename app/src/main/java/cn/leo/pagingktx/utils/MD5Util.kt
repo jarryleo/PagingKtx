@@ -10,7 +10,7 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019/4/18
  */
 object MD5Util {

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 import javax.net.ssl.*
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/4/28
  * OkHttp3 生成配置
  */

@@ -8,7 +8,7 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-11-15
  */
 class ViewModelCreator<T : ViewModel>(private val clazz: Class<T>) :

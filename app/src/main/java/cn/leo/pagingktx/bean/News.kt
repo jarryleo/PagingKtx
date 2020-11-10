@@ -1,7 +1,7 @@
 package cn.leo.pagingktx.bean
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/12
  */
 class News(

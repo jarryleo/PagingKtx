@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import cn.leo.pagingktx.db.bean.User
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-12-03
  */
 @Database(entities = [User::class], version = 1)

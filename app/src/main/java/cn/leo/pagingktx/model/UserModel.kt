@@ -13,7 +13,7 @@ import cn.leo.retrofit_ktx.utils.io
 import kotlin.random.Random
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2020/5/11
  */
 class UserModel : ViewModel() {

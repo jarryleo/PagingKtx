@@ -9,7 +9,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-04-26
  */
 object FactoryException {

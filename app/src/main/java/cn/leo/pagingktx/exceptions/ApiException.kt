@@ -2,7 +2,7 @@ package cn.leo.retrofitktx.exceptions
 
 
 /**
- * @author : ling luo
+ * @author : leo
  * @date : 2019-04-26
  */
 class ApiException : Exception {
