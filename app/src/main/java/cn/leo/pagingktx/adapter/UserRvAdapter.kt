@@ -1,6 +1,6 @@
 package cn.leo.pagingktx.adapter
 
-import cn.leo.paging_ktx.PagedListAdapterKtx
+import cn.leo.paging_ktx.PagingDataAdapterKtx
 import cn.leo.pagingktx.R
 import cn.leo.pagingktx.db.bean.User
 
@@ -8,8 +8,8 @@ import cn.leo.pagingktx.db.bean.User
  * @author : leo
  * @date : 2020/5/11
  */
-class UserRvAdapter : PagedListAdapterKtx<User>(
-    createDiffCallback(
+class UserRvAdapter : PagingDataAdapterKtx<User>(
+    itemCallback(
         areItemsTheSame = { old, new ->
             old.id == new.id
         },

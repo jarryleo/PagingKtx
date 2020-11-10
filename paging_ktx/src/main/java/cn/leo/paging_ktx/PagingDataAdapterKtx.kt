@@ -11,6 +11,7 @@ import androidx.annotation.*
 import androidx.annotation.IntRange
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.PagingDataAdapter
 import androidx.paging.filter
@@ -22,16 +23,16 @@ import androidx.recyclerview.widget.RecyclerView
  * @date : 2020/5/11
  */
 @Suppress("UNUSED", "UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
-abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.ViewHolder> {
+abstract class PagingDataAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.ViewHolder> {
 
-    constructor() : super(createDiffCallback())
+    constructor() : super(itemCallback())
 
     constructor(diffCallback: DiffUtil.ItemCallback<T>) : super(diffCallback)
 
     companion object {
-        fun <T> createDiffCallback(
-            areItemsTheSame: (T, T) -> Boolean = { _, _ -> false },
-            areContentsTheSame: (T, T) -> Boolean = { _, _ -> false },
+        fun <T> itemCallback(
+            areItemsTheSame: (T, T) -> Boolean = { o, n -> o == n },
+            areContentsTheSame: (T, T) -> Boolean = { o, n -> o == n },
             getChangePayload: (T, T) -> Any? = { _, _ -> null }
         ): DiffUtil.ItemCallback<T> {
             return object : DiffUtil.ItemCallback<T>() {
@@ -49,7 +50,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
             }
         }
     }
-
+    //<editor-fold desc="子类必须实现">
     /**
      * 获取条目类型的布局
      *
@@ -72,12 +73,15 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         payloads: MutableList<Any>? = null
     )
 
+    //</editor-fold>
+
+    //<editor-fold desc="父类方法实现">
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return ViewHolder(parent, viewType)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as? PagedListAdapterKtx<*>.ViewHolder)?.onBindViewHolder(position)
+        (holder as? PagingDataAdapterKtx<*>.ViewHolder)?.onBindViewHolder(position)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -87,7 +91,9 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
     fun getData(position: Int): T? {
         return getItem(position)
     }
+    //</editor-fold>
 
+    //<editor-fold desc="数据处理">
     /**
      * 保存提交的数据集
      */
@@ -101,7 +107,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
     /**
      * 采用setPagingData 可以动态增减数据
      */
-    fun setPagingData(lifecycle: Lifecycle, pagingData: PagingData<T>) {
+    open fun setPagingData(lifecycle: Lifecycle, pagingData: PagingData<T>) {
         mLifecycle = lifecycle
         mPagingData = pagingData
         submitData(lifecycle, pagingData)
@@ -170,7 +176,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         notifyItemChanged(position, payload)
     }
 
-
+    //</editor-fold>
     /**
      * 局部刷新
      */
@@ -182,14 +188,14 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         if (payloads.isEmpty()) {
             onBindViewHolder(holder, position)
         } else {
-            val viewHolder = holder as? PagedListAdapterKtx<*>.ViewHolder
+            val viewHolder = holder as? PagingDataAdapterKtx<*>.ViewHolder
             val helper = viewHolder?.itemHelper
             val itemHolder = helper?.mItemHolder
             val item = getItem(position)
             if (itemHolder != null) {
                 itemHolder.bindData(helper, item, payloads)
             } else {
-                (holder as? PagedListAdapterKtx<*>.ViewHolder)?.onBindViewHolder(
+                (holder as? PagingDataAdapterKtx<*>.ViewHolder)?.onBindViewHolder(
                     position,
                     payloads
                 )
@@ -199,7 +205,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
 
 
     override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
-        val viewHolder = holder as? PagedListAdapterKtx<*>.ViewHolder
+        val viewHolder = holder as? PagingDataAdapterKtx<*>.ViewHolder
         val helper = viewHolder?.itemHelper
         val itemHolder = helper?.mItemHolder
         itemHolder?.onViewDetach(helper)
@@ -218,7 +224,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
             itemHelper.setLayoutResId(layout)
             itemHelper.setOnItemChildClickListener(mOnItemChildClickListenerProxy)
             itemHelper.setOnItemChildLongClickListener(mOnItemChildLongClickListenerProxy)
-            itemHelper.setRVAdapter(this@PagedListAdapterKtx)
+            itemHelper.setRVAdapter(this@PagingDataAdapterKtx)
             itemView.setOnClickListener(this)
             itemView.setOnLongClickListener(this)
         }
@@ -231,26 +237,26 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
 
         override fun onClick(v: View) {
             if (::mOnItemClickListener.isInitialized) {
-                mOnItemClickListener(this@PagedListAdapterKtx, v, mPosition)
+                mOnItemClickListener(this@PagingDataAdapterKtx, v, mPosition)
             }
         }
 
         override fun onLongClick(v: View): Boolean {
             if (::mOnItemLongClickListener.isInitialized) {
-                mOnItemLongClickListener(this@PagedListAdapterKtx, v, mPosition)
+                mOnItemLongClickListener(this@PagingDataAdapterKtx, v, mPosition)
                 return true
             }
             return false
         }
     }
 
-    class ItemHelper(private val viewHolder: PagedListAdapterKtx<*>.ViewHolder) :
+    class ItemHelper(private val viewHolder: PagingDataAdapterKtx<*>.ViewHolder) :
         View.OnClickListener, View.OnLongClickListener {
         private val viewCache = SparseArray<View>()
         private val clickListenerCache = ArrayList<Int>()
         private val longClickListenerCache = ArrayList<Int>()
         private val mTags = HashMap<String, Any>()
-        lateinit var adapter: PagedListAdapterKtx<out Any>
+        lateinit var adapter: PagingDataAdapterKtx<out Any>
             private set
 
         @LayoutRes
@@ -262,10 +268,10 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         var tag: Any? = null
 
         private lateinit var mOnItemChildClickListener:
-                    (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                    (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
 
         private lateinit var mOnItemChildLongClickListener:
-                    (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                    (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
 
         fun setLayoutResId(@LayoutRes layoutResId: Int) {
             this.itemLayoutResId = layoutResId
@@ -273,19 +279,19 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
 
         fun setOnItemChildClickListener(
             onItemChildClickListener:
-                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
         ) {
             mOnItemChildClickListener = onItemChildClickListener
         }
 
         fun setOnItemChildLongClickListener(
             onItemChildLongClickListener:
-                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
         ) {
             mOnItemChildLongClickListener = onItemChildLongClickListener
         }
 
-        fun setRVAdapter(PagedListAdapter: PagedListAdapterKtx<out Any>) {
+        fun setRVAdapter(PagedListAdapter: PagingDataAdapterKtx<out Any>) {
             adapter = PagedListAdapter
         }
 
@@ -554,7 +560,6 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         }
     }
 
-
     /**
      * 多条目类型防止 adapter臃肿，每个条目请继承此类
      *
@@ -568,7 +573,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
          * @param helper 帮助类
          * @param item   数据
          */
-        abstract fun bindData(helper: ItemHelper, item: T?, payload: Any? = null)
+        abstract fun bindData(helper: ItemHelper, data: T?, payloads: MutableList<Any>? = null)
 
         /**
          * 初始化view，只在view第一次创建调用
@@ -576,7 +581,7 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
          * @param helper 帮助类
          * @param item   数据
          */
-        open fun initView(helper: ItemHelper, item: T?) {}
+        open fun initView(helper: ItemHelper, data: T?) {}
 
 
         /**
@@ -589,23 +594,24 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
         }
     }
 
+    //<editor-fold desc="事件监听">
     private lateinit var mOnItemClickListener:
-                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
     private lateinit var mOnItemLongClickListener:
-                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
     private lateinit var mOnItemChildClickListener:
-                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
     private lateinit var mOnItemChildLongClickListener:
-                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+                (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
     val mOnItemChildClickListenerProxy:
-                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit =
+                (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit =
         { adapter, v, position ->
             if (::mOnItemChildClickListener.isInitialized) {
                 mOnItemChildClickListener(adapter, v, position)
             }
         }
     val mOnItemChildLongClickListenerProxy:
-                (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit =
+                (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit =
         { adapter, v, position ->
             if (::mOnItemChildLongClickListener.isInitialized) {
                 mOnItemChildLongClickListener(adapter, v, position)
@@ -614,23 +620,113 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
 
     fun setOnItemClickListener(
         onItemClickListener:
-            (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+            (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
     ) {
         mOnItemClickListener = onItemClickListener
     }
 
     fun setOnItemLongClickListener(
         onItemLongClickListener:
-            (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+            (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
     ) {
         mOnItemLongClickListener = onItemLongClickListener
     }
 
     fun setOnItemChildClickListener(
         onItemChildClickListener:
-            (adapter: PagedListAdapterKtx<out Any>, v: View, position: Int) -> Unit
+            (adapter: PagingDataAdapterKtx<out Any>, v: View, position: Int) -> Unit
     ) {
         mOnItemChildClickListener = onItemChildClickListener
     }
+    //</editor-fold>
 
+    //<editor-fold desc="状态监听">
+
+    /**
+     * 刷新状态监听
+     */
+    private lateinit var mOnRefreshStateListener: (State) -> Unit
+
+    /**
+     * 向后加载更多状态监听
+     */
+    private lateinit var mOnLoadMoreStateListener: (State) -> Unit
+
+    /**
+     * 向前加载更多监听
+     */
+    private lateinit var mOnPrependStateListener: (State) -> Unit
+
+    //是否执行了loading
+    var hasLoading = false
+
+    init {
+        addLoadStateListener {
+            if (::mOnRefreshStateListener.isInitialized) {
+                dispatchState(
+                    it.refresh,
+                    it.source.append.endOfPaginationReached,
+                    mOnRefreshStateListener
+                )
+            }
+            if (::mOnLoadMoreStateListener.isInitialized) {
+                dispatchState(
+                    it.append,
+                    it.source.append.endOfPaginationReached,
+                    mOnLoadMoreStateListener
+                )
+            }
+            if (::mOnPrependStateListener.isInitialized) {
+                dispatchState(
+                    it.prepend,
+                    it.source.append.endOfPaginationReached,
+                    mOnPrependStateListener
+                )
+            }
+        }
+    }
+
+    private fun dispatchState(
+        loadState: LoadState,
+        noMoreData: Boolean,
+        stateListener: (State) -> Unit
+    ) {
+        when (loadState) {
+            is LoadState.Loading -> {
+                hasLoading = true
+                stateListener(State.Loading)
+            }
+            is LoadState.NotLoading -> {
+                if (hasLoading) {
+                    stateListener(State.Finished(noMoreData))
+                }
+            }
+            is LoadState.Error -> {
+                stateListener(State.Error)
+            }
+        }
+    }
+
+    /**
+     * 刷新状态监听
+     */
+    fun setOnRefreshStateListener(listener: (State) -> Unit) {
+        mOnRefreshStateListener = listener
+    }
+
+    /**
+     * 向后加载更多状态监听
+     */
+    fun setOnLoadMoreStateListener(listener: (State) -> Unit) {
+        mOnLoadMoreStateListener = listener
+    }
+
+    /**
+     * 向前加载更多状态监听
+     */
+    fun setOnPrependStateListener(listener: (State) -> Unit) {
+        mOnPrependStateListener = listener
+    }
+
+    //</editor-fold>
 }

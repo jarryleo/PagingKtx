@@ -6,7 +6,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.cachedIn
-import cn.leo.pagingktx.bean.News
+import cn.leo.pagingktx.bean.NewsBean
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,8 +26,8 @@ class ZhiHuNewsViewModel : BaseViewModel() {
 
     val allNews =
         Pager(PagingConfig(20), initialKey = initialKey) {
-            object : PagingSource<Long, News.StoriesBean>() {
-                override suspend fun load(params: LoadParams<Long>): LoadResult<Long, News.StoriesBean> {
+            object : PagingSource<Long, NewsBean.StoriesBean>() {
+                override suspend fun load(params: LoadParams<Long>): LoadResult<Long, NewsBean.StoriesBean> {
                     val date = params.key ?: initialKey
                     return try {
                         val data = api.getNews(date).await()
