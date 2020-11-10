@@ -50,7 +50,11 @@ class UserModel : ViewModel() {
             User(0, it, Random.nextInt(2))
         }.toTypedArray()
         println("userList : ---------${userList.size}")
-        db.userDao().insert(*userList)
+        db.runInTransaction {
+            //先清空再插入新数据
+            db.userDao().delAll()
+            db.userDao().insert(*userList)
+        }
     }
 
     //更新条目

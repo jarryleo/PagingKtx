@@ -130,15 +130,31 @@ abstract class PagedListAdapterKtx<T : Any> : PagingDataAdapter<T, RecyclerView.
     }
 
     /**
-     * 移除过滤数据
+     * 过滤数据
      * @param predicate 条件为false的移除，为true的保留
      */
     fun filterItem(predicate: suspend (T) -> Boolean) {
         if (!this::mPagingData.isInitialized || !this::mLifecycle.isInitialized) {
-            throw IllegalArgumentException("To filter data, you must use the 'setPagingData' method")
+            throw IllegalArgumentException("To edit data, you must use the 'setPagingData' method")
         }
         mPagingData = mPagingData.filter(predicate)
         submitData(mLifecycle, mPagingData)
+    }
+
+    /**
+     * 移除数据
+     * @param item 要移除的条目
+     */
+    fun removeItem(item: T) {
+        filterItem { it != item }
+    }
+
+    /**
+     * 移除数据
+     * @param position 要移除的条目的索引
+     */
+    fun removeItem(position: Int) {
+        filterItem { it != getData(position) }
     }
 
     /**

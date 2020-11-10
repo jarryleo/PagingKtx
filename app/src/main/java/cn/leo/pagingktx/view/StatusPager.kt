@@ -62,7 +62,7 @@ class StatusPager private constructor(private val mBuilder: Builder) :
         var mEmptyId = View.NO_ID
         var mErrorId = View.NO_ID
         var mClickIds: MutableList<Int>? = null
-        var mOnClickListener: OnClickListener? = null
+        var mOnClickListener: (StatusPager, View) -> Unit = { _, _ -> }
         var mIsRelative = false
 
         /**
@@ -131,7 +131,7 @@ class StatusPager private constructor(private val mBuilder: Builder) :
             return this
         }
 
-        fun setRetryClickListener(listener: OnClickListener?): Builder {
+        fun setRetryClickListener(listener: (StatusPager, View) -> Unit = { _, _ -> }): Builder {
             mOnClickListener = listener
             return this
         }
@@ -145,7 +145,7 @@ class StatusPager private constructor(private val mBuilder: Builder) :
         }
     }
 
-    fun setRetryClickListener(listener: OnClickListener?): StatusPager {
+    fun setRetryClickListener(listener: (StatusPager, View) -> Unit = { _, _ -> }): StatusPager {
         mBuilder.mOnClickListener = listener
         return this
     }
@@ -236,7 +236,7 @@ class StatusPager private constructor(private val mBuilder: Builder) :
     }
 
     override fun onClick(v: View) {
-        mBuilder.mOnClickListener?.onClick(this, v)
+        mBuilder.mOnClickListener(this, v)
     }
 
     private fun getViewById(
@@ -270,10 +270,6 @@ class StatusPager private constructor(private val mBuilder: Builder) :
             mBuilder.mTarget.visibility = View.GONE
         }
         mBuilder.mReplace?.visibility = View.VISIBLE
-    }
-
-    interface OnClickListener {
-        fun onClick(statusManager: StatusPager?, v: View?)
     }
 
     class ViewHelper(private val mView: View?) {

@@ -4,12 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import cn.leo.pagingktx.adapter.FooterAdapter
 import cn.leo.pagingktx.adapter.UserRvAdapter
 import cn.leo.pagingktx.db.bean.User
 import cn.leo.pagingktx.model.UserModel
@@ -17,7 +16,6 @@ import cn.leo.pagingktx.utils.toast
 import cn.leo.pagingktx.view.StatusPager
 import cn.leo.retrofit_ktx.view_model.ViewModelCreator
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,33 +40,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initView() {
+        srl_refresh.setEnableLoadMore(false)
         rv_user.layoutManager = LinearLayoutManager(this)
-        rv_user.adapter = userRvAdapter
+        rv_user.adapter = userRvAdapter.withLoadStateFooter(FooterAdapter())
         //数据源
         model.allStudents.observe(this, Observer {
-            lifecycleScope.launchWhenCreated {
-                userRvAdapter.submitData(it)
-            }
+            userRvAdapter.submitData(this.lifecycle, it)
         })
-        //请求状态
-        lifecycleScope.launchWhenCreated {
-            userRvAdapter.loadStateFlow.collectLatest {
-                when (it.refresh) {
-                    is LoadState.Loading -> {
-                        statePager.showLoading()
-                    }
-                    is LoadState.NotLoading -> {
-                        srl_refresh.finishRefresh(true)
-                        srl_refresh.finishLoadMoreWithNoMoreData()
+        //刷新状态
+        var hasRefreshing = false
+        userRvAdapter.addLoadStateListener {
+            when (it.refresh) {
+                is LoadState.Loading -> {
+                    hasRefreshing = true
+                }
+                is LoadState.NotLoading -> {
+                    if (hasRefreshing) {
+                        hasRefreshing = false
                         statePager.showContent()
+                        srl_refresh.finishRefresh(true)
                     }
-                    is LoadState.Error -> {
-                        statePager.showError()
-                    }
+                }
+                is LoadState.Error -> {
+                    srl_refresh.finishRefresh(false)
                 }
             }
         }
-
+        //设置点击事件
         userRvAdapter.setOnItemClickListener { adapter, _, position ->
             val user = adapter.getData(position) as? User
             user?.let {
@@ -76,7 +74,6 @@ class MainActivity : AppCompatActivity() {
                 toast("修改条目成功（$position）")
             }
         }
-
         //设置下拉刷新
         srl_refresh.setOnRefreshListener {
             userRvAdapter.refresh()
