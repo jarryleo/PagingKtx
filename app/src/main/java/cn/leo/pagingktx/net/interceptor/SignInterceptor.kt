@@ -2,7 +2,7 @@ package cn.leo.retrofitktx.interceptor
 
 import android.text.TextUtils
 import android.util.Log
-import cn.leo.retrofitktx.utils.UrlUtil
+import cn.leo.pagingktx.utils.UrlUtil
 import okhttp3.*
 import okio.Buffer
 import java.io.IOException

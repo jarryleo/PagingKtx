@@ -2,7 +2,7 @@ package cn.leo.pagingktx.net.interceptor
 
 
 import android.util.Log
-import cn.leo.retrofitktx.utils.UrlUtil
+import cn.leo.pagingktx.utils.UrlUtil
 import okhttp3.Interceptor
 import okhttp3.RequestBody
 import okhttp3.Response

@@ -1,4 +1,4 @@
-package cn.leo.retrofitktx.utils
+package cn.leo.pagingktx.utils
 
 import android.content.Context
 import android.net.ConnectivityManager

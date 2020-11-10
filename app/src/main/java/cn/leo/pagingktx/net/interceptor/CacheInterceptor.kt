@@ -1,12 +1,13 @@
 package cn.leo.retrofitktx.interceptor
 
 import cn.leo.pagingktx.App
-import cn.leo.retrofitktx.utils.checkNetwork
+import cn.leo.pagingktx.utils.checkNetwork
 import okhttp3.CacheControl
 import okhttp3.Interceptor
 import okhttp3.Response
 
 import java.io.IOException
+import kotlin.jvm.Throws
 
 /**
  * @author : leo

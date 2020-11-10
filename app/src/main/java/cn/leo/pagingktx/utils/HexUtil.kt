@@ -1,4 +1,6 @@
-package cn.leo.retrofitktx.utils
+package cn.leo.pagingktx.utils
+
+import kotlin.jvm.Throws
 
 /**
  * @author : leo
